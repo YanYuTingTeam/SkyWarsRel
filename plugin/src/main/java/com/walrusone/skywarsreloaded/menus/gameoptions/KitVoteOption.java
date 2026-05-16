@@ -31,8 +31,6 @@ public class KitVoteOption {
 	public KitVoteOption (GameMap gameMap, String key) {
 		this.gameMap = gameMap;
 		createMenu(key, new Messaging.MessageFormatter().format("menu.kit-voting-menu"));
-		
-
 	}
 	
 	private void createMenu(String key, String name) {
@@ -101,7 +99,7 @@ public class KitVoteOption {
     		kit = gameKit.getLIcon();
     		kit.setAmount(1);
     		lores.add(" ");
-    		lores.add(gameKit.getColoredLockedLore());
+    		lores.add(ChatColor.RED + "需要权限解锁此Kit!");
 		}
 		kit = SkyWarsReloaded.getNMS().getItemStack(kit, lores, gameKit.getColorName());
 		iconMenu.getInventories().get(gameKit.getPage()-1).setItem(gameKit.getPosition(), kit);
@@ -134,7 +132,7 @@ public class KitVoteOption {
 			if (locked) {
 				kit = gKit.getLIcon();
 				lores.add(" ");
-				lores.add(gKit.getColoredLockedLore());
+				lores.add(ChatColor.RED + "需要权限解锁此Kit!");
 			} else {
 				kit = gKit.getIcon();
 				lores.add(" ");
@@ -187,6 +185,4 @@ public class KitVoteOption {
 	public String getKey() {
 		return key;
 	}
-
-
 }

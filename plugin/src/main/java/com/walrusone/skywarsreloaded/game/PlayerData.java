@@ -153,8 +153,12 @@ public class PlayerData {
 	    }
 
 	    public void setTaggedBy(Player player) {
-			taggedBy = new Tagged(player, System.currentTimeMillis());
+			taggedBy = new Tagged(player, System.currentTimeMillis(), false);
 		}
+	
+	public void setTaggedBy(Player player, boolean isProjectile) {
+		taggedBy = new Tagged(player, System.currentTimeMillis(), isProjectile);
+	}
 		
 		public Tagged getTaggedBy() {
 			return taggedBy;

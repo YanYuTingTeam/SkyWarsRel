@@ -8,8 +8,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.common.collect.Lists;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
@@ -37,20 +37,15 @@ public class KitSelectionMenu {
                         invs.add(Bukkit.createInventory(null, menuSize + 9, menuName));
                     }
                 }
-                List<String> loreList = Lists.newLinkedList();
-                ItemStack item = kit.getLIcon();
-                boolean hasPermission = true;
-                if (kit.needPermission()) {
-                    if (!player.hasPermission("sw.kit." + kit.getFilename())) {
-                        loreList.add(kit.getColoredLockedLore());
-                        hasPermission = false;
-                    }
+                List<String> loreList = kit.getColorLores();
+                ItemStack item = kit.getIcon();
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', kit.getName()));
+                    meta.setLore(loreList);
+                    item.setItemMeta(meta);
                 }
-                if (hasPermission) {
-                    loreList.addAll(kit.getColorLores());
-                    item = kit.getIcon();
-                }
-                invs.get(page).setItem(pos, SkyWarsReloaded.getNMS().getItemStack(item, loreList, ChatColor.translateAlternateColorCodes('&', kit.getName())));
+                invs.get(page).setItem(pos, item);
             }
             if (gMap != null) {
             	SkyWarsReloaded.getIC().create(player, invs, event -> {
@@ -74,7 +69,7 @@ public class KitSelectionMenu {
                     player.closeInventory();
                     Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getConfirmeSelctionSound(), 1, 1);
                     gMap.setKitVote(player, kit);
-                    player.sendMessage(new Messaging.MessageFormatter().setVariable("kit", kit.getColorName()).format("game.select-kit"));
+                    player.sendMessage(new Messaging.MessageFormatter().setVariable("kit", kit.getFilename()).format("game.select-kit"));
                 });
             }
             if (player != null) {

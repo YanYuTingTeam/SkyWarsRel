@@ -1005,6 +1005,8 @@ public class GameMap {
 		for (TeamCard tCard: teamCards) {
 			tCard.reset();
 		}
+		spectators.clear();
+		joinQueue.clear();
 		thunder = false;
 		forceStart = false;
 		allowRegen = true;

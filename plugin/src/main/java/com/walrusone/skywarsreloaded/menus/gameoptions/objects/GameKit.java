@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,7 +12,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.google.common.collect.Maps;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Util;
@@ -29,8 +27,7 @@ public class GameKit {
 	private String filename;
 	private int position;
 	private int page;
-	private Map<Integer, String> lores = Maps.newHashMap();
-	private String lockedLore;
+	private List<String> lores = new ArrayList<>();
 	private boolean enabled;
 	private boolean requirePermission;
 
@@ -64,11 +61,7 @@ public class GameKit {
         	storage.set("page", page);
         }
         
-        for (int x = 1; x < 17; x++) {
-        	lores.put(x, storage.getString("lores.line" + x, " "));
-        } 
-        
-        lockedLore = storage.getString("lores.locked", "");
+        lores = storage.getStringList("lores");
         
         enabled = storage.getBoolean("enabled");
         
@@ -84,24 +77,23 @@ public class GameKit {
 	}
 	
 	private GameKit(String fnam, String nam, int pos, int pag, ItemStack ico, String lore) {
-        inventory = new ItemStack[41];
-        armor = new ItemStack[4];
-        icon = ico;    
-        lIcon = new ItemStack(Material.BARRIER, 1);
-        name = nam;
-        filename = fnam;
-        position = pos;
-        page = pag;
-       	lores.put(1, lore);
-        for (int x = 2; x < 17; x++) {
-        	lores.put(x, " ");
-        } 
-        lockedLore = "";
-        enabled = true;
-        requirePermission = false;
+	    inventory = new ItemStack[41];
+	    armor = new ItemStack[4];
+	    icon = ico;    
+	    lIcon = new ItemStack(Material.BARRIER, 1);
+	    name = nam;
+	    filename = fnam;
+	    position = pos;
+	    page = pag;
+	    lores.add(lore); 
+	    for (int x = 2; x < 17; x++) {
+	        lores.add(" "); 
+	    } 
+	    enabled = true;
+	    requirePermission = false;
 	}
 		
-    private ItemStack[] getArmor() {
+    public ItemStack[] getArmor() {
 		return armor;
 	}
     
@@ -113,7 +105,7 @@ public class GameKit {
     	this.inventory = inv.clone();
     }
 
-	private ItemStack[] getInventory() {
+	public ItemStack[] getInventory() {
 		return inventory;
 	}
 	
@@ -182,42 +174,23 @@ public class GameKit {
 	}
 	
 	public List<String> getColorLores() {
-		List<String> colorLores = new ArrayList<>();
-		int spaces = 0;
-		for (int x = 1; x < 17; x++ ) {
-			if (lores.get(x).equals(" ")) {
-				spaces++;
-			} else {
-				if (spaces > 0) {
-					for (int y = 1; y <= spaces; y++) {
-						colorLores.add(" ");
-					}
-					spaces = 0;
-				}
-				colorLores.add(ChatColor.translateAlternateColorCodes('&', lores.get(x)));
-			}
-		}
-		return colorLores;
+	    List<String> colorLores = new ArrayList<>();
+	    for (String lore : lores) {
+	        colorLores.add(ChatColor.translateAlternateColorCodes('&', lore));
+	    }
+	    return colorLores;
 	}
 	
-	private Map<Integer, String> getLores() {
-		return this.lores;
-	}
-	
-	public String getColoredLockedLore() {
-		return ChatColor.translateAlternateColorCodes('&', lockedLore);
-	}
-	
-	private String getLockedLore() {
-		return lockedLore;
+	private List<String> getLores() {
+	    return this.lores;
 	}
 	
 	public void setLoreLine(int line, String lore) {
-		this.lores.put(line, lore);
-	}
-	
-	public void setLockedLore(String lore) {
-		this.lockedLore = lore;
+	    if (line - 1 >= 0 && line - 1 < lores.size()) {
+	        lores.set(line - 1, lore);
+	    } else {
+	        lores.add(lore);
+	    }
 	}
 	
 	//STATIC METHODS
@@ -235,20 +208,30 @@ public class GameKit {
 	}
 	
 	public static void giveKit(Player player, GameKit kit) {
+	       if (player == null || !player.isOnline()) return;
 	       player.getInventory().clear();
+	       player.getInventory().setArmorContents(null);
+	       
 	       if (kit != null) {
-		        for (int i = 0; i < 36; i++) {
-		        	if (kit.getInventory()[i] != null) {
-		        		player.getInventory().setItem(i, kit.getInventory()[i]);
-		        	}
-		        }
+	           ItemStack[] kitInv = kit.getInventory();
+	           if (kitInv != null) {
+	               int limit = Math.min(kitInv.length, player.getInventory().getSize());
+	               for (int i = 0; i < limit; i++) {
+	                   if (kitInv[i] != null && kitInv[i].getType() != Material.AIR) {
+	                       player.getInventory().setItem(i, kitInv[i]);
+	                   }
+	               }
+	           }
 		              
-		        player.getInventory().setArmorContents(kit.getArmor());
+	           if (kit.getArmor() != null) {
+	               player.getInventory().setArmorContents(kit.getArmor());
+	           }
 		        
-		    	if (SkyWarsReloaded.getCfg().debugEnabled()) {
-		    		Util.get().logToFile(ChatColor.RED + "[skywars] " + ChatColor.YELLOW + player.getName() + " has recieved kit " + kit.getColorName());
-		    	}
+		       if (SkyWarsReloaded.getCfg().debugEnabled()) {
+		           Util.get().logToFile(ChatColor.RED + "[skywars] " + ChatColor.YELLOW + player.getName() + " has recieved kit " + kit.getColorName());
+		       }
 	       }
+	       player.updateInventory();
 		}
 	
 	public static void newKit(Player player, String kitName) {
@@ -283,10 +266,7 @@ public class GameKit {
         
         storage.set("enabled", false);
         
-        for (int x = 1; x < 17; x++) {
-        	storage.set("lores.line" + x, " ");
-        }
-        storage.set("lores.locked", "&CPermission required to unlock this kit!");
+        storage.set("lores", new ArrayList<String>());
         
         storage.set("gameSettings.noRegen", false);
         storage.set("gameSettings.noPvp", false);
@@ -332,11 +312,7 @@ public class GameKit {
         
         storage.set("enabled", kit.getEnabled());
         
-        for (int x = 1; x < 17; x++) {
-        	storage.set("lores.line" + x, kit.getLores().get(x));
-        }
-
-        storage.set("lores.locked", kit.getLockedLore());
+        storage.set("lores", kit.getLores());
         
         storage.set("filename", kit.getFilename());
         
@@ -399,4 +375,3 @@ public class GameKit {
 	}
 
 }
-

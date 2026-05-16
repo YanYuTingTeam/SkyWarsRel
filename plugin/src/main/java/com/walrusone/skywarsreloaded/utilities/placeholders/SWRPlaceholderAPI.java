@@ -5,15 +5,39 @@ import org.bukkit.plugin.Plugin;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 
-import me.clip.placeholderapi.external.EZPlaceholderHook;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
-public class SWRPlaceholderAPI extends EZPlaceholderHook {
+public class SWRPlaceholderAPI extends PlaceholderExpansion {
 
 	private SkyWarsReloaded swr;
 	
 	public SWRPlaceholderAPI(Plugin plugin) {
-		super(plugin, "swr");
 		this.swr = (SkyWarsReloaded) plugin;
+	}
+
+	@Override
+	public boolean persist(){
+		return true;
+	}
+
+	@Override
+	public boolean canRegister(){
+		return true;
+	}
+
+	@Override
+	public String getAuthor(){
+		return swr.getDescription().getAuthors().toString();
+	}
+
+	@Override
+	public String getIdentifier(){
+		return "swr";
+	}
+
+	@Override
+	public String getVersion(){
+		return swr.getDescription().getVersion();
 	}
 
 	@Override

@@ -14,6 +14,10 @@ public class GameQueue {
 	private GameMap map;
 	private boolean running = false;
 	
+	public void clear() {
+		queue.clear();
+		running = false;
+	}
 	GameQueue(GameMap g) {
 		map = g;
 	}

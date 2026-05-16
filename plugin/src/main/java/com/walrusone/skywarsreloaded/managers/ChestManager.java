@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class ChestManager {
-
 	private final Map<Integer, Inventory> chestItemList = new HashMap<>();
 	private final Map<Integer, Inventory> opChestItemList = new HashMap<>();
 	private final Map<Integer, Inventory> basicChestItemList = new HashMap<>();
@@ -29,13 +28,9 @@ public class ChestManager {
 	private final Map<Integer, Inventory> basicCenterChestItemList = new HashMap<>();
 	private final Map<Integer, Inventory> opCenterChestItemList = new HashMap<>();
 	private final Map<Integer, Inventory> crateItemList = new HashMap<>();
-
     private final Random random = new Random();
-   
     private List<Integer> randomLoc = new ArrayList<>();
     private List<Integer> randomDLoc = new ArrayList<>();
-
-
     public ChestManager() {
         load(chestItemList, "chest.yml");
         load(opChestItemList, "opchest.yml");
@@ -164,39 +159,42 @@ public class ChestManager {
 
 	private void fillChest(Object chest, Map<Integer, Inventory> fill) {
 		Inventory inventory = null;
+		boolean isDoubleChest = chest instanceof DoubleChest;
 		if (chest instanceof Chest) {
 			inventory = ((Chest) chest).getInventory();
-		} else if (chest instanceof DoubleChest) {
+		} else if (isDoubleChest) {
 			inventory = ((DoubleChest) chest).getInventory();
 		}
 		if (inventory != null) {
 			inventory.clear();
-			int added = 0;
-			Collections.shuffle(randomLoc);
-			Collections.shuffle(randomDLoc);
+			int maxItems = isDoubleChest ? 
+				SkyWarsReloaded.getCfg().getMaxDoubleChest() : 
+				SkyWarsReloaded.getCfg().getMaxChest();
+			int inventorySize = inventory.getSize();
+			int maxAllowed = Math.min(maxItems, inventorySize);
+			int minCount = Math.max(8, (int)(maxAllowed * 0.7));
+			int maxCount = maxAllowed;
+			if (minCount > maxCount) {
+				minCount = maxCount;
+			}
+			int targetCount = random.nextInt(maxCount - minCount + 1) + minCount;
+			List<ItemStack> candidates = new ArrayList<>();
 			for (int chance: fill.keySet()) {
 				for (ItemStack item: fill.get(chance)) {
 					if (item != null && !item.getType().equals(Material.AIR)) {
-						if (chest instanceof Chest) {
-							if (random.nextInt(100) + 1 <= chance) {
-								inventory.setItem(randomLoc.get(added), item);
-								added++;
-								if (added >= inventory.getSize() - 1 || added >= SkyWarsReloaded.getCfg().getMaxChest()) {
-									break;
-								}
-							}
-						}
-						if (chest instanceof DoubleChest) {
-							if (random.nextInt(100) + 1 <= chance) {
-								inventory.setItem(randomDLoc.get(added), item);
-								added++;
-								if (added >= inventory.getSize() - 1 || added >= SkyWarsReloaded.getCfg().getMaxDoubleChest()) {
-									break;
-								}
-							}
+						if (random.nextInt(100) + 1 <= chance) {
+							candidates.add(item);
 						}
 					}
 				}
+			}
+			
+			Collections.shuffle(candidates);
+			List<Integer> positions = isDoubleChest ? randomDLoc : randomLoc;
+			Collections.shuffle(positions);
+			int actualCount = Math.min(targetCount, Math.min(candidates.size(), positions.size()));
+			for (int i = 0; i < actualCount; i++) {
+				inventory.setItem(positions.get(i), candidates.get(i));
 			}
 		}
 	}
@@ -204,21 +202,29 @@ public class ChestManager {
     public void fillCrate(Inventory inventory, int max) {
     	if (inventory != null) {
     		inventory.clear();
-            int added = 0;
-            Collections.shuffle(randomLoc);
-
+    		int maxAllowed = Math.min(max, inventory.getSize());
+    		int minCount = Math.max(8, (int)(maxAllowed * 0.7));
+    		int maxCount = maxAllowed;
+    		if (minCount > maxCount) {
+    			minCount = maxCount;
+    		}
+    		int targetCount = random.nextInt(maxCount - minCount + 1) + minCount;
+    		List<ItemStack> candidates = new ArrayList<>();
 			for (int chance: crateItemList.keySet()) {
 				for (ItemStack item : crateItemList.get(chance)) {
 					if (item != null && !item.getType().equals(Material.AIR)) {
 						if (random.nextInt(100) + 1 <= chance) {
-							inventory.setItem(randomLoc.get(added), item);
-							added++;
-							if (added >= inventory.getSize() - 1 || added >= max) {
-								break;
-							}
+							candidates.add(item);
 						}
 					}
 				}
+			}
+			
+			Collections.shuffle(candidates);
+			Collections.shuffle(randomLoc);
+			int actualCount = Math.min(targetCount, Math.min(candidates.size(), randomLoc.size()));
+			for (int i = 0; i < actualCount; i++) {
+				inventory.setItem(randomLoc.get(i), candidates.get(i));
 			}
     	}
     }

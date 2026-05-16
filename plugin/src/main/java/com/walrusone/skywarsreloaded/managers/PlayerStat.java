@@ -35,6 +35,7 @@ public class PlayerStat
     private int deaths;
     private int elo;
     private int xp;
+    private int runcount;
     private String particleEffect;
     private String projectileEffect;
     private String glassColor;
@@ -104,6 +105,10 @@ public class PlayerStat
 							@Override
 							public void run() {
 								if (Util.get().isSpawnWorld(player.getWorld())) {
+									if (MatchManager.get().getPlayerMap(player) != null) {
+										return;
+									}
+									
 									if(SkyWarsReloaded.getCfg().protectLobby()) {
 										player.setGameMode(GameMode.ADVENTURE);
 										player.setHealth(20);
@@ -202,6 +207,18 @@ public class PlayerStat
     
     public void setXp(int x) {
     	this.xp = x;
+    }
+    
+    public int getRunCount() {
+    	return this.runcount;
+    }
+    
+    public void setRunCount(int runCount) {
+    	this.runcount = runCount;
+    }
+    
+    public void incrementRunCount() {
+    	this.runcount++;
     }
     
     public void setKills(final int a1) {

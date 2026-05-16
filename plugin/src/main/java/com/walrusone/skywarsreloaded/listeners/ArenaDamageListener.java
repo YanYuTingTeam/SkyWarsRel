@@ -1,6 +1,8 @@
 package com.walrusone.skywarsreloaded.listeners;
 
 import com.walrusone.skywarsreloaded.enums.GameType;
+import com.walrusone.skywarsreloaded.utilities.Util;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -66,7 +68,36 @@ public class ArenaDamageListener implements Listener {
 			if (hitter != null && hitter != target) {
 				PlayerData pd = PlayerData.getPlayerData(target.getUniqueId());
 				if (pd != null) {
-					pd.setTaggedBy(hitter);
+					pd.setTaggedBy(hitter, true);
+					if (damager instanceof Arrow) {
+						double distance = hitter.getLocation().distance(target.getLocation());
+						double damage = event.getFinalDamage();
+						double hurtTwo = Math.round(damage * 100) / 100.0;
+						double hurtOne = Math.round(damage * 10) / 10.0;
+						double remainingHealth = target.getHealth() - damage;
+						if (remainingHealth < 0) remainingHealth = 0;
+						String bowHitMsg = SkyWarsReloaded.getExtConfig().getBowHit()
+							.replace("{target}", target.getName())
+							.replace("{hurt_two}", String.format("%.2f", hurtTwo))
+							.replace("{hurt_one}", String.format("%.1f", hurtOne))
+							.replace("{distance}", String.format("%.2f", distance));
+						hitter.sendMessage(ChatColor.translateAlternateColorCodes('&', bowHitMsg));
+						String healthsMsg = SkyWarsReloaded.getExtConfig().getHealths()
+							.replace("{player}", target.getName())
+							.replace("{hurt_two}", String.format("%.2f", remainingHealth))
+							.replace("{hurt_one}", String.format("%.1f", Math.round(remainingHealth * 10) / 10.0));
+						hitter.sendMessage(ChatColor.translateAlternateColorCodes('&', healthsMsg));
+					} else if (damager instanceof FishHook) {
+						double damage = event.getFinalDamage();
+						double remainingHealth = target.getHealth() - damage;
+						if (remainingHealth < 0) remainingHealth = 0;
+						
+						String healthsMsg = SkyWarsReloaded.getExtConfig().getHealths()
+							.replace("{player}", target.getName())
+							.replace("{hurt_two}", String.format("%.2f", remainingHealth))
+							.replace("{hurt_one}", String.format("%.1f", Math.round(remainingHealth * 10) / 10.0));
+						hitter.sendMessage(ChatColor.translateAlternateColorCodes('&', healthsMsg));
+					}
 				}
 			}
 		}
@@ -80,6 +111,19 @@ public class ArenaDamageListener implements Listener {
 		}
 		if (pd != null) {
 			pd.setTaggedBy(hitter);
+			if (SkyWarsReloaded.getShowDamageManager().isShowDamageEnabled(hitter.getUniqueId())) {
+				double damage = event.getFinalDamage();
+				double hurtOne = Math.round(damage * 10) / 10.0;
+				String hitSubtitleMsg = SkyWarsReloaded.getExtConfig().getHitSubtitle()
+					.replace("{hurt_one}", String.format("%.1f", hurtOne));
+				
+				Util.get().sendTitle(hitter,
+					SkyWarsReloaded.getExtConfig().getFadein(),
+					SkyWarsReloaded.getExtConfig().getStay(),
+					SkyWarsReloaded.getExtConfig().getFadeout(),
+					"",
+					ChatColor.translateAlternateColorCodes('&', hitSubtitleMsg));
+			}
 		}
 	}
 	

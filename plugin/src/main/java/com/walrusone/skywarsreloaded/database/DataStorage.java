@@ -58,6 +58,7 @@ public class DataStorage {
 	            fc.set("deaths", pData.getDeaths());
 	            fc.set("elo", pData.getElo());
 	            fc.set("xp", pData.getXp());
+	            fc.set("runcount", pData.getRunCount());
 	            fc.set("pareffect", pData.getParticleEffect());
 	            fc.set("proeffect", pData.getProjectileEffect());
 	            fc.set("glasscolor", pData.getGlassColor());
@@ -80,7 +81,7 @@ public class DataStorage {
             PreparedStatement preparedStatement = null;
 
             try {
-            	 String query = "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `elo` = ?, `xp` = ?, `pareffect` = ?, " +
+            	 String query = "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `elo` = ?, `xp` = ?, `runcount` = ?, `pareffect` = ?, " +
 						 "`proeffect` = ?, `glasscolor` = ?,`killsound` = ?, `winsound` = ?, `taunt` = ? WHERE `uuid` = ?;";
                  
                  preparedStatement = connection.prepareStatement(query);
@@ -91,13 +92,14 @@ public class DataStorage {
                  preparedStatement.setInt(5, pData.getDeaths());
                  preparedStatement.setInt(6, pData.getElo());
                  preparedStatement.setInt(7, pData.getXp());
-                 preparedStatement.setString(8, pData.getParticleEffect());
-                 preparedStatement.setString(9, pData.getProjectileEffect());
-                 preparedStatement.setString(10, pData.getGlassColor());
-                 preparedStatement.setString(11, pData.getKillSound());
-                 preparedStatement.setString(12, pData.getWinSound());
-                 preparedStatement.setString(13, pData.getTaunt());
-                 preparedStatement.setString(14, pData.getId());
+                 preparedStatement.setInt(8, pData.getRunCount());
+                 preparedStatement.setString(9, pData.getParticleEffect());
+                 preparedStatement.setString(10, pData.getProjectileEffect());
+                 preparedStatement.setString(11, pData.getGlassColor());
+                 preparedStatement.setString(12, pData.getKillSound());
+                 preparedStatement.setString(13, pData.getWinSound());
+                 preparedStatement.setString(14, pData.getTaunt());
+                 preparedStatement.setString(15, pData.getId());
                  preparedStatement.executeUpdate();
 
             } catch (final SQLException sqlException) {
@@ -135,6 +137,7 @@ public class DataStorage {
 		                        pData.setDeaths(0);
 		                        pData.setElo(1500);
 		                        pData.setXp(0);
+		                        pData.setRunCount(0);
 		                        pData.setParticleEffect("none");
 		                        pData.setProjectileEffect("none");
 		                        pData.setGlassColor("none");
@@ -147,7 +150,7 @@ public class DataStorage {
 			                    ResultSet resultSet = null;
 
 			                    try {
-			                        String query = "SELECT `wins`, `losses`, `kills`, `deaths`, `elo`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt` " +
+			                        String query = "SELECT `wins`, `losses`, `kills`, `deaths`, `elo`, `xp`, `runcount`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt` " +
 											"FROM `sw_player` WHERE `uuid` = ? LIMIT 1;";
 
 			                        preparedStatement = connection.prepareStatement(query);
@@ -161,6 +164,7 @@ public class DataStorage {
 			                            pData.setDeaths(resultSet.getInt("deaths"));
 			                            pData.setElo(resultSet.getInt("elo"));
 			                            pData.setXp(resultSet.getInt("xp"));
+			                            pData.setRunCount(resultSet.getInt("runcount"));
 			                            pData.setParticleEffect(resultSet.getString("pareffect"));
 			                            pData.setProjectileEffect(resultSet.getString("proeffect"));
 			                            pData.setGlassColor(resultSet.getString("glasscolor"));
@@ -211,6 +215,7 @@ public class DataStorage {
 		                        pData.setDeaths(fc.getInt("deaths"));
 		                        pData.setElo(fc.getInt("elo"));
 		                        pData.setXp(fc.getInt("xp"));
+		                        pData.setRunCount(fc.getInt("runcount"));
 		                        pData.setParticleEffect(fc.getString("pareffect"));
 		                        pData.setProjectileEffect(fc.getString("proeffect"));
 		                        pData.setGlassColor(fc.getString("glasscolor"));

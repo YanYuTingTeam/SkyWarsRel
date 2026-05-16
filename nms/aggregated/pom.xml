@@ -18,47 +18,7 @@
     <dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_8_r1</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_8_r2</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>skywarsreloaded-nms-v1_8_r3</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_9_r1</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_9_r2</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_10_r1</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_11_r1</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_12_r1</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>skywarsreloaded-nms-v1_13_r2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
     </dependencies>

@@ -3,6 +3,7 @@ losses: 0
 kills: 0
 deaths: 0
 elo: 1500
+runcount: 0
 pareffect: none
 proeffect: none
 glasscolor: none

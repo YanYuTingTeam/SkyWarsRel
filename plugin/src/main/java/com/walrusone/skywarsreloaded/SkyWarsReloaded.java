@@ -43,6 +43,8 @@ import com.walrusone.skywarsreloaded.managers.Leaderboard;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.managers.WorldManager;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
+import com.walrusone.skywarsreloaded.utilities.ExtConfig;
+import com.walrusone.skywarsreloaded.utilities.ShowDamageManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.holograms.HoloDisUtil;
 import com.walrusone.skywarsreloaded.utilities.holograms.HologramsUtil;
@@ -62,6 +64,8 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	private ItemsManager im;
 	private PlayerOptionsManager pom;
 	private Config config;
+	private ExtConfig extConfig;
+	private ShowDamageManager showDamageManager;
 	private static Database db;
 	private ChestManager cm;
 	private WorldManager wm;
@@ -127,9 +131,11 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         saveConfig();
         reloadConfig();
 
-        config = new Config();   
+        config = new Config();
+        extConfig = new ExtConfig();
+        showDamageManager = new ShowDamageManager();
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-        	new SWRPlaceholderAPI(this).hook();
+        	new SWRPlaceholderAPI(this).register();
         }
         
         if (Bukkit.getPluginManager().isPluginEnabled("MVdWPlaceholderAPI")) {
@@ -452,5 +458,13 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	public static PlayerOptionsManager getOM() {
 		return instance.pom;
 	}
-    
+
+	public static ExtConfig getExtConfig() {
+		return instance.extConfig;
+	}
+
+	public static ShowDamageManager getShowDamageManager() {
+		return instance.showDamageManager;
+	}
+
 }

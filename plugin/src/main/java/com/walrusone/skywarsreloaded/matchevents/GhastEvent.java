@@ -4,7 +4,6 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
-import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -60,9 +59,7 @@ public class GhastEvent extends MatchEvent {
 		if (gMap.getMatchState() == MatchState.PLAYING) {
 			this.fired = true;
 			sendTitle();
-			CoordLoc loc = gMap.getSpectateSpawn();
 			World world = gMap.getCurrentWorld();
-			Location location = new Location(world, loc.getX(), loc.getY(), loc.getZ());
 			br1 = new BukkitRunnable() {
 				@Override
 				public void run() {

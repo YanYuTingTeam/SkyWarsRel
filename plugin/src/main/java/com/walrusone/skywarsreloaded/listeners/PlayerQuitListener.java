@@ -17,6 +17,8 @@ public class PlayerQuitListener implements Listener
 {
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent a1) {
+		a1.setQuitMessage(null);
+		
 		final String id = a1.getPlayer().getUniqueId().toString();
 		Party party = Party.getParty(a1.getPlayer());
 		if (party != null) {

@@ -107,7 +107,6 @@ public class TeamCard {
 				if (SkyWarsReloaded.getCfg().kitVotingEnabled()) {
 					gMap.getKitVoteOption().updateKitVotes();
 				}
-				gMap.setTimer(SkyWarsReloaded.getCfg().getWaitTimer());
 				return true;
 			}
 		}
@@ -129,6 +128,7 @@ public class TeamCard {
 		for (PlayerCard pCard: playerCards) {
 			pCard.reset();
 		}
+		updateCard(gMap.getTeamSize());
 		this.dead.clear();
 	}
 

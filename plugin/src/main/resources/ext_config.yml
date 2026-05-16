@@ -1,0 +1,14 @@
+fadein: 20
+stay: 40
+fadeout: 20
+healths: '&7{player} &e剩余血量 &a{hurt_two} &eHP!'
+kill_subtitle: '&e击杀 &f+1'
+hit_subtitle: '&f伤害 - &3{hurt_one}'
+bow_hit: '&b集中&c{target}&b造成&a{hurt_two}&b点伤害 (距离:{distance}米)'
+bow_kill: '&c{target} 被 {player} 射死了 ({distance}米远)'
+shon: '&a伤害显示开启!'
+shon_e: '&c你已经开启了伤害显示,请勿重复开启!'
+shon_notif: '&a已为你自动开启 &c伤害显示 &a，输入 &c/shoff &a关闭'
+shoff: '&c伤害显示关闭!'
+shoff_e: '&c你已经关闭了伤害显示,请勿重复关闭!'
+shoff_notif: '&a已为你自动关闭 &c伤害显示 &a，输入 &c/shon &a开启'
