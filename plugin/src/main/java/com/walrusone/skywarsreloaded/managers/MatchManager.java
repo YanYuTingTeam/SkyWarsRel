@@ -448,6 +448,10 @@ public class MatchManager
                 		}
                 	}
                 }
+				if (SkyWarsReloaded.getCfg().instantVoidDeath()) {
+					for (final Player player : gameMap.getAlivePlayers()) {
+						if (player != null && player.getLocation().getY() <= SkyWarsReloaded.getCfg().voidDeathY()) player.damage(20);
+					}}
                 if (gameMap.isThunder()) {
                 	if (gameMap.getStrikeCounter() == gameMap.getNextStrike()) {
     					World mapWorld = gameMap.getCurrentWorld();

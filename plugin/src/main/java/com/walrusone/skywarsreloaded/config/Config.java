@@ -14,6 +14,8 @@ import com.walrusone.skywarsreloaded.enums.LeaderType;
 import com.walrusone.skywarsreloaded.utilities.Util;
 
 public class Config {
+	private boolean instantVoidDeath;
+	private int voidDeathY;
 
 	private boolean debug;
 	
@@ -264,6 +266,8 @@ public class Config {
 	public void load() {
 		if (!loading) {
 			loading = true;
+			instantVoidDeath = SkyWarsReloaded.get().getConfig().getBoolean("game.instantVoidDeath");
+			voidDeathY = SkyWarsReloaded.get().getConfig().getInt("game.voidDeathY");
 			debug = SkyWarsReloaded.get().getConfig().getBoolean("debugMode");
 			
 			bungeeMode = SkyWarsReloaded.get().getConfig().getBoolean("bungeeMode");
@@ -486,6 +490,8 @@ public class Config {
 	}
 
 	public void save() {
+		SkyWarsReloaded.get().getConfig().set("game.instantVoidDeath", instantVoidDeath);
+		SkyWarsReloaded.get().getConfig().set("game.voidDeathY", voidDeathY);
 		SkyWarsReloaded.get().getConfig().set("debugMode", debug);
 		
 		SkyWarsReloaded.get().getConfig().set("spawn", Util.get().locationToString(spawn));
@@ -1184,6 +1190,9 @@ public class Config {
 	public List<String> getGameEndCommands() {
 		return gameEndCommands;
 	}
+
+	public boolean instantVoidDeath() { return instantVoidDeath; }
+	public int voidDeathY() { return voidDeathY; }
 }
 
 

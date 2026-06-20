@@ -14,6 +14,8 @@ displayPlayerLevelOnXpBar: true
 enabledLobbyGuard: false
 economyEnabled: false
 game:
+  instantVoidDeath: true
+  voidDeathY: -56
   worldBorder:
     enabled: false
     borderSize: 400
@@ -35,7 +37,7 @@ game:
   waitTimer: 10
   kitVotingEnabled: false
   spectateEnabled: true
-  specTime: 3000 # 新增 -> 玩家胜利几秒后会变成旁观者. 单位ms
+  specTime: 3000 # 新增 -> 玩家胜利几秒后会变成旁观者. ms
   allowFallDamage: false
   maxMapSize: 400
   tauntsEnabled: true
