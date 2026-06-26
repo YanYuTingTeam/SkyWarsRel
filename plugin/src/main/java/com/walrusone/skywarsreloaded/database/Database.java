@@ -25,7 +25,7 @@ public class Database {
 	        final int port = SkyWarsReloaded.get().getConfig().getInt("sqldatabase.port");
 	        final String database = SkyWarsReloaded.get().getConfig().getString("sqldatabase.database");
 
-	        connectionUri = String.format("jdbc:mysql://%s:%d/%s", hostname, port, database);
+			connectionUri = String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8", hostname, port, database);
 	        username = SkyWarsReloaded.get().getConfig().getString("sqldatabase.username");
 	        password = SkyWarsReloaded.get().getConfig().getString("sqldatabase.password");
 

@@ -190,6 +190,23 @@ public class PlayerInteractListener implements Listener {
 			if (gameMap.getMatchState() == MatchState.PLAYING) {
 				if (a1.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					Block block = a1.getClickedBlock();
+					if (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) {
+						a1.setCancelled(true);
+						Player p = a1.getPlayer();
+						Chest chest = (Chest) block.getState();
+						InventoryHolder holder = chest.getInventory().getHolder();
+						if (holder instanceof DoubleChest) {
+							p.openInventory(((DoubleChest) holder).getInventory());
+						} else {
+							p.openInventory(chest.getInventory());
+						}
+						if (SkyWarsReloaded.getNMS().getVersion() < 9) {
+							p.getWorld().playSound(p.getLocation(), Sound.valueOf("CHEST_OPEN"), 1, 1);
+						} else {
+							p.getWorld().playSound(p.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 1);
+						}
+						return;
+					}
 					if (block.getType().equals(Material.ENDER_CHEST)) {
 						for (GameMap gMap: GameMap.getPlayableArenas(GameType.ALL)) {
 							for (Crate crate: gMap.getCrates()) {
