@@ -161,7 +161,7 @@ public class MatchManager
     }
            
     public void teleportToArena(final GameMap gameMap, PlayerCard pCard) {
-    	if (pCard.getPlayer() != null && pCard.getTeamCard().getSpawn() != null && gameMap.getMatchState().equals(MatchState.WAITINGSTART)) {
+		if (pCard.getPlayer() != null && pCard.getTeamCard().getSpawn() != null && gameMap.getMatchState().equals(MatchState.WAITINGSTART) && gameMap.isMapReady()) {
     		Player player = pCard.getPlayer();
     		PlayerData existingPd = PlayerData.getPlayerData(player.getUniqueId());
     		if (existingPd == null) {

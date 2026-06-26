@@ -123,6 +123,7 @@ public class GameMap {
 	private ArrayList<MatchEvent> events = new ArrayList<>();
 	private ArrayList<String> deathMatchWaiters = new ArrayList<>();
 	private ArrayList<String> anvils = new ArrayList<>();
+	private boolean mapReady = false;
 		
     public GameMap(final String name) {
         this.name = name;
@@ -454,7 +455,7 @@ public class GameMap {
     }
     
     public boolean canAddPlayer() {
-    	if (!(this.matchState == MatchState.WAITINGSTART && this.registered)) {
+		if (!this.mapReady || !(this.matchState == MatchState.WAITINGSTART && this.registered)) {
     		return false;
     	}
     	for (TeamCard tCard: teamCards) {
@@ -466,7 +467,7 @@ public class GameMap {
     }
     
     public boolean canAddParty(Party party) {
-    	if (!(this.matchState == MatchState.WAITINGSTART && this.registered)) {
+		if (!this.mapReady || !(this.matchState == MatchState.WAITINGSTART && this.registered)) {
     		return false;
     	}
     	if (teamSize == 1) {
@@ -1028,6 +1029,8 @@ public class GameMap {
 		weatherOption.restore();
 		modifierOption.restore();
 		gameboard.setRestartTimer(-1);
+		this.mapReady = false;
+		this.matchState = MatchState.OFFLINE;
 		SkyWarsReloaded.getWM().deleteWorld(name);
 		final GameMap gMap = this;
 		if (SkyWarsReloaded.get().isEnabled()) {
@@ -1035,19 +1038,22 @@ public class GameMap {
 				@Override
 				public void run() {
 					gMap.loadMap();
+					World world = SkyWarsReloaded.get().getServer().getWorld(gMap.name);
+					if (world == null) return;
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							World w = SkyWarsReloaded.get().getServer().getWorld(gMap.name);
+							if (w == null) return;
+							gMap.mapReady = true;
+							gMap.matchState = MatchState.WAITINGSTART;
+							gMap.gameboard.updateScoreboard();
+							MatchManager.get().start(gMap);
+							gMap.update();
+						}
+					}.runTaskLater(SkyWarsReloaded.get(), 40);
 				}
 			}.runTaskLater(SkyWarsReloaded.get(), 10);
-		}
-		if (SkyWarsReloaded.get().isEnabled()) {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					matchState = MatchState.WAITINGSTART;
-					gameboard.updateScoreboard();
-					MatchManager.get().start(gMap);
-					update();
-				}
-			}.runTaskLater(SkyWarsReloaded.get(), 50);
 		}
 	}
 	
@@ -1813,6 +1819,8 @@ public class GameMap {
 	public boolean isDoubleDamageEnabled() {
 		return doubleDamageEnabled;
 	}
+
+	public boolean isMapReady() {return mapReady;}
 
 	public class TeamCardComparator implements Comparator<TeamCard> {
 		@Override
