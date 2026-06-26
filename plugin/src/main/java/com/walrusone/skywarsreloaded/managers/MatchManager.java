@@ -718,8 +718,8 @@ public class MatchManager
 							
 							if (killer != null && killer.isOnline()) {
 								boolean isProjectileKill = playerData.getTaggedBy().isProjectile();
-								
-								if (isProjectileKill) {
+
+								if (isProjectileKill && dCause != DamageCause.VOID) {
 									double distance = killer.getLocation().distance(player.getLocation());
 									String bowKillMsg = SkyWarsReloaded.getExtConfig().getBowKill()
 										.replace("{target}", player.getName())

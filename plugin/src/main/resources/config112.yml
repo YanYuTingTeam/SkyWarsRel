@@ -15,7 +15,7 @@ enabledLobbyGuard: false
 economyEnabled: false
 game:
   instantVoidDeath: true
-  voidDeathY: -56
+  voidDeathY: -46
   worldBorder:
     enabled: false
     borderSize: 400
