@@ -74,7 +74,7 @@ public class PlayerStat
 						public void run() {
 		            		if (SkyWarsReloaded.getCfg().bungeeMode()) {
 		                		Player player = SkyWarsReloaded.get().getServer().getPlayer(UUID.fromString(uuid));
-		                		if (player != null) {
+		                		if (player != null && MatchManager.get().getPlayerMap(player) == null) {
 		                			boolean joined = MatchManager.get().joinGame(player, GameType.ALL);
 		                			if (!joined) {
 		                    			SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());

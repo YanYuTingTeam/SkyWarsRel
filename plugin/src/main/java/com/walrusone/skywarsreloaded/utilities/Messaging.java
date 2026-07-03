@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +52,13 @@ public final class Messaging {
             return storage.getString(format);
         }
         return null;
+    }
+
+    private List<String> getMessageList(String format) {
+        if (storage.contains(format)) {
+            return storage.getStringList(format);
+        }
+        return new ArrayList<>();
     }
 
     public static class MessageFormatter {
@@ -106,6 +115,31 @@ public final class Messaging {
             }
 
             return ChatColor.translateAlternateColorCodes('&', message);
+        }
+
+        public List<String> formatList(String message) {
+            List<String> raw = SkyWarsReloaded.getMessaging().getMessageList(message);
+            List<String> result = new ArrayList<>();
+            for (String line : raw) {
+                if (line == null) {
+                    continue;
+                }
+                Matcher matcher = PATTERN.matcher(line);
+                while (matcher.find()) {
+                    String variable = matcher.group();
+                    variable = variable.substring(1, variable.length() - 1);
+                    String value = variableMap.get(variable);
+                    if (value == null) {
+                        value = "";
+                    }
+                    line = line.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(value));
+                }
+                if (prefix) {
+                    line = SkyWarsReloaded.getMessaging().getPrefix() + line;
+                }
+                result.add(ChatColor.translateAlternateColorCodes('&', line));
+            }
+            return result;
         }
     }
 

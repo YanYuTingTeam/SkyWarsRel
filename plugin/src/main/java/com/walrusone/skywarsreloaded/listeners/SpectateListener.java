@@ -18,10 +18,13 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.enums.GameType;
 import com.walrusone.skywarsreloaded.game.GameMap;
+import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 
@@ -82,6 +85,39 @@ public class SpectateListener implements Listener{
 			player.closeInventory();
 			gameMap.getSpectators().remove(player.getUniqueId());
 			MatchManager.get().removeSpectator(player);
+		} else if (slot == 7) {
+			e.setCancelled(true);
+			boolean hasGame = false;
+			for (GameMap gMap : GameMap.getPlayableArenas(GameType.ALL)) {
+				if (gMap.canAddPlayer()) {
+					hasGame = true;
+					break;
+				}
+			}
+			if (!hasGame) {
+				return;
+			}
+			player.closeInventory();
+			gameMap.getSpectators().remove(player.getUniqueId());
+			for (TeamCard tCard : gameMap.getTeamCards()) {
+				tCard.getDead().remove(player.getUniqueId());
+			}
+			gameMap.removePlayer(player.getUniqueId());
+			MatchManager.get().removeSpectator(player, true);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					boolean joined = MatchManager.get().joinGame(player, GameType.ALL);
+					int count = 0;
+					while (count < 4 && !joined) {
+						joined = MatchManager.get().joinGame(player, GameType.ALL);
+						count++;
+					}
+					if (!joined) {
+						player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join"));
+					}
+				}
+			}.runTaskLater(SkyWarsReloaded.get(), 5);
 		} else if (slot >= 9 && slot <= 35) {
 			player.closeInventory();
 			ItemStack item = e.getCurrentItem();

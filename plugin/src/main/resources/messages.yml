@@ -192,6 +192,11 @@ spectate:
   exititemlore: '&bClick to leave spectator mode'
   playeritemlore: '&bClick to teleport to {player}'
   stayinarena: '&cPlease stay within the bouncewars Arena!'
+  againitemname: '&a再来一局'
+  againitemlore:
+    - '&7 '
+    - '&7      点击此按钮再来一局'
+    - '&7 '
 menu:
   usetaunt-menu-title: '&5Taunt Menu'
   usetaunt-settaunt: '&aClick to Set Your Taunt'

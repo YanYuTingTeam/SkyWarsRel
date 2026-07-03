@@ -65,6 +65,10 @@ public class PlayerData {
 	    }
 	    
 		public void restore(boolean playerQuit) {
+			restore(playerQuit, false);
+		}
+
+		public void restore(boolean playerQuit, boolean skipBungee) {
 			if (!beingRestored) {
 				beingRestored = true;
 		        final Player player = this.getPlayer();
@@ -126,7 +130,7 @@ public class PlayerData {
 		    	if (SkyWarsReloaded.getCfg().debugEnabled()) {
 		        	Util.get().logToFile(ChatColor.RED + "[skywars] " + ChatColor.YELLOW + "Finished restoring " + player.getName() + ". Teleporting to Spawn");
 		    	}
-				if (SkyWarsReloaded.getCfg().bungeeMode()) {
+				if (SkyWarsReloaded.getCfg().bungeeMode() && !skipBungee) {
 					new BukkitRunnable() {
 						@Override
 						public void run() {
