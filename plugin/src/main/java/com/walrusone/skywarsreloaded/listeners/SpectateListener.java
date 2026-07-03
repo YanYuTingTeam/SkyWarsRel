@@ -18,17 +18,17 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.enums.GameType;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 
 public class SpectateListener implements Listener{
-	
 	private HashMap<String, BukkitTask> teleportRequests = new HashMap<>();
-		
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerTeleport(PlayerTeleportEvent e) {
 		final Player player = e.getPlayer();
@@ -40,7 +40,7 @@ public class SpectateListener implements Listener{
 			e.setCancelled(true);
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onSpectatorDamaged(EntityDamageEvent e) {
 		if (e.getEntity() instanceof Player) {
@@ -56,9 +56,9 @@ public class SpectateListener implements Listener{
 				player.teleport(spectateSpawn);
 			}
 		}
-		
+
 	}
-	
+
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		final Player player = e.getPlayer();
@@ -69,7 +69,7 @@ public class SpectateListener implements Listener{
 		gameMap.getSpectators().remove(player.getUniqueId());
 		MatchManager.get().removeSpectator(player);
 	}
-		
+
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onInventoryClick(InventoryClickEvent e) {
 		final Player player = (Player) e.getWhoClicked();
@@ -82,22 +82,51 @@ public class SpectateListener implements Listener{
 			player.closeInventory();
 			gameMap.getSpectators().remove(player.getUniqueId());
 			MatchManager.get().removeSpectator(player);
+		} else if (slot == 7) {
+			e.setCancelled(true);
+			boolean hasGame = false;
+			for (GameMap gMap : GameMap.getPlayableArenas(GameType.ALL)) {
+				if (gMap.canAddPlayer()) {
+					hasGame = true;
+					break;
+				}
+			}
+			if (!hasGame) {
+				return;
+			}
+			player.closeInventory();
+			gameMap.getSpectators().remove(player.getUniqueId());
+			MatchManager.get().removeSpectator(player);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					boolean joined = MatchManager.get().joinGame(player, GameType.ALL);
+					int count = 0;
+					while (count < 4 && !joined) {
+						joined = MatchManager.get().joinGame(player, GameType.ALL);
+						count++;
+					}
+					if (!joined) {
+						player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join"));
+					}
+				}
+			}.runTaskLater(SkyWarsReloaded.get(), 5);
 		} else if (slot >= 9 && slot <= 35) {
 			player.closeInventory();
 			ItemStack item = e.getCurrentItem();
 			if (item != null && !item.getType().equals(Material.AIR)) {
 				String name = ChatColor.stripColor(item.getItemMeta().getDisplayName());
 				Player toSpec = SkyWarsReloaded.get().getServer().getPlayer(name);
-	            if (toSpec != null) {
-    				if (!gameMap.mapContainsDead(toSpec.getUniqueId()) && player != null) {
-    					player.teleport(toSpec.getLocation(), TeleportCause.END_PORTAL);
-    				}
-	            }
+				if (toSpec != null) {
+					if (!gameMap.mapContainsDead(toSpec.getUniqueId()) && player != null) {
+						player.teleport(toSpec.getLocation(), TeleportCause.END_PORTAL);
+					}
+				}
 			}
 		}
 
 	}
-	
+
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerMove(PlayerMoveEvent e) {
 		if(teleportRequests.containsKey(e.getPlayer().getUniqueId().toString())) {

@@ -923,49 +923,57 @@ public class MatchManager
     private void setWaitTime(int waitTime) {
     	this.waitTime = waitTime;
     }
-    
+
 	public void addSpectator(final GameMap gameMap, final Player player) {
-        if (player != null) {
-        	World world = gameMap.getCurrentWorld();
-        	CoordLoc ss = gameMap.getSpectateSpawn();
+		if (player != null) {
+			World world = gameMap.getCurrentWorld();
+			CoordLoc ss = gameMap.getSpectateSpawn();
 			Location spectateSpawn = new Location(world, ss.getX(), ss.getY(), ss.getZ());
-            player.teleport(spectateSpawn, TeleportCause.END_PORTAL);
-            
-            new BukkitRunnable() {
+			player.teleport(spectateSpawn, TeleportCause.END_PORTAL);
+
+			new BukkitRunnable() {
 				@Override
 				public void run() {
 					PlayerData pd = PlayerData.getPlayerData(player.getUniqueId());
 					if (pd == null) {
 						PlayerData.getPlayerData().add(new PlayerData(player));
 					}
-		            Util.get().clear(player);
-		            player.getInventory().setBoots(new ItemStack(Material.AIR, 1));
-		            player.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
-		            player.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
-		            player.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
-		            player.setGameMode(GameMode.SPECTATOR);
-		            player.setScoreboard(gameMap.getGameBoard().getScoreboard());
-		            
-		            prepareSpectateInv(player, gameMap);
-		    		
-		    		ItemStack exitItem = new ItemStack(Material.IRON_DOOR, 1);
-		    		ItemMeta exit = exitItem.getItemMeta();
-		    		exit.setDisplayName(new Messaging.MessageFormatter().format("spectate.exititemname"));
-		    		List<String> lore = new ArrayList<>();
-		    		lore.add(new Messaging.MessageFormatter().format("spectate.exititemlore"));
-		    		exit.setLore(lore);
-		    		exitItem.setItemMeta(exit);
-		            player.getInventory().setItem(8, exitItem);
-		            player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage"));
-		            player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage2"));
-		        	if (debug) {
-		            	Util.get().logToFile(debugName + ChatColor.YELLOW + player.getName() + " has been added to spectators");
-		        	}
+					Util.get().clear(player);
+					player.getInventory().setBoots(new ItemStack(Material.AIR, 1));
+					player.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
+					player.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
+					player.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
+					player.setGameMode(GameMode.SPECTATOR);
+					player.setScoreboard(gameMap.getGameBoard().getScoreboard());
+
+					prepareSpectateInv(player, gameMap);
+
+					ItemStack exitItem = new ItemStack(Material.IRON_DOOR, 1);
+					ItemMeta exit = exitItem.getItemMeta();
+					exit.setDisplayName(new Messaging.MessageFormatter().format("spectate.exititemname"));
+					List<String> lore = new ArrayList<>();
+					lore.add(new Messaging.MessageFormatter().format("spectate.exititemlore"));
+					exit.setLore(lore);
+					exitItem.setItemMeta(exit);
+					player.getInventory().setItem(8, exitItem);
+
+					ItemStack againItem = new ItemStack(Material.MINECART, 1);
+					ItemMeta again = againItem.getItemMeta();
+					again.setDisplayName(new Messaging.MessageFormatter().format("spectate.againitemname"));
+					again.setLore(new Messaging.MessageFormatter().formatList("spectate.againitemlore"));
+					againItem.setItemMeta(again);
+					player.getInventory().setItem(7, againItem);
+
+					player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage"));
+					player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage2"));
+					if (debug) {
+						Util.get().logToFile(debugName + ChatColor.YELLOW + player.getName() + " has been added to spectators");
+					}
 				}
 
-            }.runTaskLater(SkyWarsReloaded.get(), 3);
-            gameMap.getSpectators().add(player.getUniqueId());
-        }
+			}.runTaskLater(SkyWarsReloaded.get(), 3);
+			gameMap.getSpectators().add(player.getUniqueId());
+		}
 	}
 	
 	private void prepareSpectateInv(Player player, GameMap gameMap) {
