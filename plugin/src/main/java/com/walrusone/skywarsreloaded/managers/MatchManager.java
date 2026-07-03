@@ -610,8 +610,7 @@ public class MatchManager
                         for (final UUID uuid: gameMap.getSpectators()) {
                                 final Player player = SkyWarsReloaded.get().getServer().getPlayer(uuid);
                                 if (player != null) {
-                                GameMap otherMap = MatchManager.get().getPlayerMap(player);
-                                if (otherMap != null && otherMap != gameMap) {
+                                if (isInOtherGame(player, gameMap)) {
                                         continue;
                                 }
                                 removeSpectator(player);
@@ -624,8 +623,7 @@ public class MatchManager
                                                 gameMap.removePlayer(player.getUniqueId());
                                                 continue;
                                         }
-                                GameMap otherMap = MatchManager.get().getPlayerMap(player);
-                                if (otherMap != null && otherMap != gameMap) {
+                                if (isInOtherGame(player, gameMap)) {
                                         gameMap.removePlayer(player.getUniqueId());
                                         continue;
                                 }
@@ -894,7 +892,21 @@ public class MatchManager
         }
         return null;
     }
-        
+
+    public boolean isInOtherGame(Player player, GameMap excludeMap) {
+        if (player == null) return false;
+        for (GameMap gMap : GameMap.getMaps()) {
+            if (gMap == excludeMap) continue;
+            for (Player alive : gMap.getAlivePlayers()) {
+                if (player.equals(alive)) return true;
+            }
+            for (UUID spec : gMap.getSpectators()) {
+                if (player.getUniqueId().equals(spec)) return true;
+            }
+        }
+        return false;
+    }
+
         public GameMap getDeadPlayerMap(final Player v0) {
                 if (v0 != null) {
             for (final GameMap gameMap : GameMap.getMaps()) {

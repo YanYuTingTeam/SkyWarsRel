@@ -771,8 +771,7 @@ public class GameMap {
                 for (final UUID uuid: this.getSpectators()) {
                 final Player player = SkyWarsReloaded.get().getServer().getPlayer(uuid);
                 if (player != null) {
-                        GameMap otherMap = MatchManager.get().getPlayerMap(player);
-                        if (otherMap != null && otherMap != this) {
+                        if (MatchManager.get().isInOtherGame(player, this)) {
                                 continue;
                         }
                         MatchManager.get().removeSpectator(player);
@@ -780,8 +779,7 @@ public class GameMap {
         }
         for (final Player player : this.getAlivePlayers()) {
                 if (player != null) {
-                GameMap otherMap = MatchManager.get().getPlayerMap(player);
-                if (otherMap != null && otherMap != this) {
+                if (MatchManager.get().isInOtherGame(player, this)) {
                         this.removePlayer(player.getUniqueId());
                         continue;
                 }
