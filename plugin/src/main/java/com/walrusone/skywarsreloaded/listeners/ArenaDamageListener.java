@@ -105,6 +105,7 @@ public class ArenaDamageListener implements Listener {
 
 	private void doPVP(Entity damager, Player target, EntityDamageByEntityEvent event, GameMap gMap) {
 		Player hitter = (Player) damager;
+		if (hitter == target) return;
 		PlayerData pd = PlayerData.getPlayerData(target.getUniqueId());
 		if (gMap.isDoubleDamageEnabled()) {
 			event.setDamage(event.getDamage()*2);

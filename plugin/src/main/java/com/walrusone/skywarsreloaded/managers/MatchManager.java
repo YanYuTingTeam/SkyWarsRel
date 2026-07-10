@@ -729,7 +729,8 @@ public class MatchManager
                                                 Util.get().logToFile(debugName + ChatColor.YELLOW + player.getName() + " died. Respawning.");
                                         }
                                         if (sendMessages) {
-                                                if (playerData.getTaggedBy() != null && System.currentTimeMillis() - playerData.getTaggedBy().getTime() < 10000) {
+                                            if (playerData.getTaggedBy() != null && System.currentTimeMillis() - playerData.getTaggedBy().getTime() < 10000
+                                                    && playerData.getTaggedBy().getPlayer() != null && playerData.getTaggedBy().getPlayer() != player) {
                                                         Player killer = playerData.getTaggedBy().getPlayer();
                                                         this.message(gameMap, Util.get().getDeathMessage(dCause, true, player, killer));
                                                         updatePlayerData(player, pCard, playerData);
