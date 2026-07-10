@@ -710,6 +710,17 @@ public class MatchManager
                                                                         .setVariable("killer", playerData.getTaggedBy().getPlayer().getName())
                                                                         .format("game.death.quit-while-tagged"));
                                                         updatePlayerData(player, pCard, playerData);
+                                                        Player killer = playerData.getTaggedBy().getPlayer();
+                                                        if (killer != null && killer.isOnline()) {
+                                                            String killSubtitleMsg = ChatColor.translateAlternateColorCodes('&',
+                                                                    SkyWarsReloaded.getExtConfig().getKillSubtitle());
+                                                            Util.get().sendTitle(killer,
+                                                                    SkyWarsReloaded.getExtConfig().getFadein(),
+                                                                    SkyWarsReloaded.getExtConfig().getStay(),
+                                                                    SkyWarsReloaded.getExtConfig().getFadeout(),
+                                                                    "",
+                                                                    killSubtitleMsg);
+                                                        }
                                                 }
                                         } else {
                                                 if (sendMessages) {
