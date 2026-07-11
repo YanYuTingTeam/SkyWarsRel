@@ -53,7 +53,7 @@ public class TeamCard {
 		return playerCards.size();
 	}
 	
-	int getFullCount() {
+	public int getFullCount() {
 		int x = 0;
 		for (PlayerCard pCard: playerCards) {
 			if (pCard.getUUID() == null) {

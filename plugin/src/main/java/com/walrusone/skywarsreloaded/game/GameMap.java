@@ -283,6 +283,10 @@ public class GameMap {
                         this.update();
                         gameboard.updateScoreboardVar(ScoreVar.PLAYERS);
                 }
+        // PartyAPI: 当队长加入游戏时，自动拉入队伍成员
+        if (result && SkyWarsReloaded.getPartyListener() != null) {
+            SkyWarsReloaded.getPartyListener().onPlayerJoinGame(player, this);
+        }
         return result;
     }
         

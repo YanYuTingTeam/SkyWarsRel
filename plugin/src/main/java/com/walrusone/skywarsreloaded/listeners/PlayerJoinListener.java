@@ -1,6 +1,8 @@
 package com.walrusone.skywarsreloaded.listeners;
 
+import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
+import com.walrusone.skywarsreloaded.utilities.MatchUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.Listener;
@@ -66,5 +68,30 @@ public class PlayerJoinListener implements Listener
 		}.runTaskLater(SkyWarsReloaded.get(), 1);
 
 		PlayerStat.getPlayers().add(new PlayerStat(a1.getPlayer()));
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				String pendingGame = MatchUtils.consumePendingPlayer(a1.getPlayer().getUniqueId());
+				if (pendingGame != null) {
+					GameMap targetGame = GameMap.getMap(pendingGame);
+					if (targetGame != null && targetGame.isRegistered()
+							&& targetGame.getMatchState() == MatchState.WAITINGSTART
+							&& targetGame.canAddPlayer()) {
+						boolean joined = targetGame.addPlayers(null, a1.getPlayer());
+						if (joined) {
+							SkyWarsReloaded.get().getLogger().info("PlayerJoin > 自动加入待处理游戏: " + a1.getPlayer().getName() + " -> " + pendingGame);
+						} else {
+							SkyWarsReloaded.get().getLogger().info("PlayerJoin > 自动加入失败: " + a1.getPlayer().getName() + " -> " + pendingGame);
+						}
+					} else {
+						GameMap bestGame = MatchUtils.getBestArena();
+						if (bestGame != null) {
+							bestGame.addPlayers(null, a1.getPlayer());
+							SkyWarsReloaded.get().getLogger().info("PlayerJoin > 自动加入最佳房间: " + a1.getPlayer().getName() + " -> " + bestGame.getName());
+						}
+					}
+				}
+			}
+		}.runTaskLater(SkyWarsReloaded.get(), 5L);
     }
 }

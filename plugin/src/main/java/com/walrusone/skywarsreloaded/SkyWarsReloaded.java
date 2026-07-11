@@ -74,6 +74,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	private HologramsUtil hu;
 	private boolean loaded;
 	private BukkitTask specObserver;
+	private PartyListener partyListener;
 
 	
 	public void onEnable() {
@@ -189,8 +190,25 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
     	if (getCfg().bungeeMode()) {
         	this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         	this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+        	this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new ProxyChannelListener());
     		Bukkit.getPluginManager().registerEvents(new PingListener(), this);
     	}
+    	
+    	// 注册 PartyAPI 队伍监听器（用于 AerParty /kh zh 召集后自动加入游戏）
+    	PartyListener partyListener = null;
+    	if (Bukkit.getPluginManager().isPluginEnabled("PartyAPI")) {
+    		partyListener = new PartyListener();
+    		if (partyListener.init()) {
+    			Bukkit.getPluginManager().registerEvents(partyListener, this);
+    			getLogger().info("PartyAPI detected, PartyListener registered.");
+    		} else {
+    			partyListener = null;
+    			getLogger().warning("PartyAPI detected but PartyListener initialization failed.");
+    		}
+    	} else {
+    		getLogger().info("PartyAPI not found, party auto-join disabled.");
+    	}
+    	this.partyListener = partyListener;
         if (getCfg().bungeeMode()) {
             new BukkitRunnable() {
                 public void run() {
@@ -467,4 +485,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 		return instance.showDamageManager;
 	}
 
+	public static PartyListener getPartyListener() {
+		return instance.partyListener;
+	}
 }
