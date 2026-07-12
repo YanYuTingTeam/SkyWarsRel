@@ -199,7 +199,6 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
     	if (Bukkit.getPluginManager().isPluginEnabled("PartyAPI")) {
     		partyListener = new PartyListener();
     		if (partyListener.init()) {
-    			Bukkit.getPluginManager().registerEvents(partyListener, this);
     			getLogger().info("PartyAPI detected, PartyListener registered.");
     		} else {
     			partyListener = null;

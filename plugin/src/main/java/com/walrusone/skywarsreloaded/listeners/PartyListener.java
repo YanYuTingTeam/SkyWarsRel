@@ -12,6 +12,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
+import org.bukkit.plugin.EventExecutor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +51,15 @@ public class PartyListener implements Listener {
             getLeaderMethod = partyInfoClass.getMethod("getLeader");
             getAllMembersMethod = partyInfoClass.getMethod("getAllMembers");
 
+            Class<?> partyLoadedEventClass = Class.forName("cn.linmoyu.partyapi.event.PartyLoadedEvent");
+            EventExecutor executor = (listener, event) -> handlePartyLoadedEvent(event);
+            Bukkit.getPluginManager().registerEvent(
+                    (Class<? extends Event>) partyLoadedEventClass,
+                    this,
+                    EventPriority.NORMAL,
+                    executor,
+                    SkyWarsReloaded.get()
+            );
             initialized = true;
             SkyWarsReloaded.get().getLogger().info("PartyListener initialized via reflection.");
             return true;
@@ -57,10 +69,8 @@ public class PartyListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPartyLoaded(org.bukkit.event.Event event) {
+    private void handlePartyLoadedEvent(org.bukkit.event.Event event) {
         if (!initialized) return;
-        if (!event.getEventName().equals("cn.linmoyu.partyapi.event.PartyLoadedEvent")) return;
 
         try {
             Method getPartyInfoMethod = event.getClass().getMethod("getPartyInfo");
