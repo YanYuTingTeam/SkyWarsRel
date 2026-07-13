@@ -771,16 +771,15 @@ public class MatchManager
                                                                         if (player != null && player.isOnline()) {
                                                                                 player.sendMessage(coloredMsg);
                                                                         }
-                                                                } else {
-                                                                        String killSubtitleMsg = ChatColor.translateAlternateColorCodes('&',
-                                                                                SkyWarsReloaded.getExtConfig().getKillSubtitle());
-                                                                        Util.get().sendTitle(killer,
-                                                                                SkyWarsReloaded.getExtConfig().getFadein(),
-                                                                                SkyWarsReloaded.getExtConfig().getStay(),
-                                                                                SkyWarsReloaded.getExtConfig().getFadeout(),
-                                                                                "",
-                                                                                killSubtitleMsg);
                                                                 }
+                                                                String killSubtitleMsg = ChatColor.translateAlternateColorCodes('&',
+                                                                        SkyWarsReloaded.getExtConfig().getKillSubtitle());
+                                                                Util.get().sendTitle(killer,
+                                                                        SkyWarsReloaded.getExtConfig().getFadein(),
+                                                                        SkyWarsReloaded.getExtConfig().getStay(),
+                                                                        SkyWarsReloaded.getExtConfig().getFadeout(),
+                                                                        "",
+                                                                        killSubtitleMsg);
                                                         }
                                                 } else {
                                                         this.message(gameMap, Util.get().getDeathMessage(dCause, false, player, player));
