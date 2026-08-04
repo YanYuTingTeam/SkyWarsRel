@@ -36,6 +36,7 @@ import com.walrusone.skywarsreloaded.game.PlayerData;
 import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 
@@ -177,8 +178,11 @@ public class MatchManager
                         world.loadChunk(world.getChunkAt(newSpawn));
                 }
                 player.setGameMode(GameMode.ADVENTURE);
-            player.setAllowFlight(true);
-            player.setFlying(true);
+            boolean patrolling = PatrolUtils.isPatrolling(player);
+            if (!patrolling) {
+                player.setAllowFlight(true);
+                player.setFlying(true);
+            }
             player.teleport(newSpawn, TeleportCause.END_PORTAL);
                         new BukkitRunnable() {
                                 @Override
@@ -189,6 +193,7 @@ public class MatchManager
                                         preparePlayer(player, gameMap);
                                 }
                         }.runTaskLater(SkyWarsReloaded.get(), 5);
+                        if (!patrolling) {
                         new BukkitRunnable() {
                                 @Override
                                 public void run() {
@@ -196,6 +201,7 @@ public class MatchManager
                                         player.setAllowFlight(false);
                                 }
                         }.runTaskLater(SkyWarsReloaded.get(), 20);
+                        }
                         PlayerStat ps = PlayerStat.getPlayerStats(player.getUniqueId());
                         if (ps != null) {
                                 String key = ps.getParticleEffect();

@@ -123,6 +123,11 @@ public class MatchUtils {
         if (player == null || !player.isOnline()) return;
         if (targetGame == null) return;
 
+        if (PatrolUtils.isPatrolling(player)) {
+            SkyWarsReloaded.get().getLogger().info("MatchUtils > 玩家处于巡查模式, 跳过匹配: " + player.getName());
+            return;
+        }
+
         // 检查玩家是否已经在其他游戏中
         GameMap currentGame = MatchManager.get().getPlayerMap(player);
         if (currentGame != null) {

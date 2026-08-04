@@ -11,6 +11,7 @@ import net.md_5.bungee.api.ChatColor;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import com.walrusone.skywarsreloaded.utilities.ShowDamageManager;
 
 public class PlayerJoinListener implements Listener
@@ -69,10 +70,14 @@ public class PlayerJoinListener implements Listener
 
 		PlayerStat.getPlayers().add(new PlayerStat(a1.getPlayer()));
 		new BukkitRunnable() {
-			@Override
-			public void run() {
-				String pendingGame = MatchUtils.consumePendingPlayer(a1.getPlayer().getUniqueId());
-				if (pendingGame != null) {
+		@Override
+		public void run() {
+			if (PatrolUtils.isPatrolling(a1.getPlayer())) {
+				SkyWarsReloaded.get().getLogger().info("PlayerJoin > 玩家处于巡查模式, 跳过自动匹配: " + a1.getPlayer().getName());
+				return;
+			}
+			String pendingGame = MatchUtils.consumePendingPlayer(a1.getPlayer().getUniqueId());
+			if (pendingGame != null) {
 					GameMap targetGame = GameMap.getMap(pendingGame);
 					if (targetGame != null && targetGame.isRegistered()
 							&& targetGame.getMatchState() == MatchState.WAITINGSTART

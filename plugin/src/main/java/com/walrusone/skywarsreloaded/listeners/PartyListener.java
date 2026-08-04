@@ -5,6 +5,7 @@ import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -147,6 +148,11 @@ public class PartyListener implements Listener {
 
                 Player member = Bukkit.getPlayer(memberId);
                 if (member == null || !member.isOnline()) continue;
+
+                if (PatrolUtils.isPatrolling(member)) {
+                    SkyWarsReloaded.get().getLogger().info("PartyListener > 队员处于巡查模式, 跳过加入: " + member.getName());
+                    continue;
+                }
 
                 GameMap memberCurrentGame = MatchManager.get().getPlayerMap(member);
                 if (memberCurrentGame != null) {
