@@ -190,7 +190,8 @@ public class PlayerInteractListener implements Listener {
 			if (gameMap.getMatchState() == MatchState.PLAYING) {
 				if (a1.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					Block block = a1.getClickedBlock();
-					if (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) {
+					Block b = block.getWorld().getBlockAt(block.getX(), block.getY()+1, block.getZ());
+					if ((block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) && b.getType()!=Material.AIR &&!a1.getPlayer().isSneaking()) {
 						a1.setCancelled(true);
 						Player p = a1.getPlayer();
 						Chest chest = (Chest) block.getState();
