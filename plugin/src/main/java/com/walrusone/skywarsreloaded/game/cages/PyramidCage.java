@@ -45,19 +45,6 @@ public class PyramidCage extends Cage {
         middleCoordOffsets.add(new CoordLoc(0,1,3));
         middleCoordOffsets.add(new CoordLoc(0,1,-3));
 
-        middleCoordOffsets.add(new CoordLoc(1,2,2));
-        middleCoordOffsets.add(new CoordLoc(1,2,-2));
-        middleCoordOffsets.add(new CoordLoc(2,2,1));
-        middleCoordOffsets.add(new CoordLoc(2,2,-1));
-        middleCoordOffsets.add(new CoordLoc(3,2,0));
-        middleCoordOffsets.add(new CoordLoc(-1,2,2));
-        middleCoordOffsets.add(new CoordLoc(-1,2,-2));
-        middleCoordOffsets.add(new CoordLoc(-2,2,1));
-        middleCoordOffsets.add(new CoordLoc(-2,2,-1));
-        middleCoordOffsets.add(new CoordLoc(-3,2,0));
-        middleCoordOffsets.add(new CoordLoc(0,2,3));
-        middleCoordOffsets.add(new CoordLoc(0,2,-3));
-
         topCoordOffsets.add(new CoordLoc(2,3,0));
         topCoordOffsets.add(new CoordLoc(1,3,1));
         topCoordOffsets.add(new CoordLoc(0,3,2));
