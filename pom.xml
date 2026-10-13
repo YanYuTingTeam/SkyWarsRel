@@ -12,7 +12,6 @@
     <modules>
         <module>plugin</module>
         <module>nms</module>
-        <module>lobby</module>
     </modules>
 
     <name>SkyWarsReloaded Parent</name>
