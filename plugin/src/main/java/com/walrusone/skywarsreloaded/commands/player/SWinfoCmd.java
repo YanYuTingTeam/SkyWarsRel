@@ -22,7 +22,10 @@ public class SWinfoCmd extends BaseCmd {
 	public boolean run() {
 		Player statPlayer = player;
         player.sendMessage("§f");
-        player.sendMessage("§3§lSkywarsRel §r§7for §b§lYanYuTing §8| §r§fby §ewalrusone§f, §eAerMini");
+        player.sendMessage("§3§lSkyWarsRel §r§7for §b§lYanYuTing §8|§r §f26-10-3");
+        player.sendMessage("§7originally by: §ewalrusone");
+        player.sendMessage("§7modified by: §eAerMini");
+        player.sendMessage("§d§lhttps://github.com/YanYuTingTeam/SkyWarsRel");
         player.sendMessage("§f");
 		return true;
 	}

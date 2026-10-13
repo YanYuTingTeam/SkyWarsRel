@@ -20,7 +20,12 @@ public class PlayerCommandPrepocessListener implements Listener
     	String[] splited = e.getMessage().split("\\s+");
 		if (splited[0].equalsIgnoreCase("/swi")) {
         	e.setCancelled(true);
-        	e.getPlayer().sendMessage("§3§lS§lk§ly§lw§la§lr§ls§lR§le§ll §r§7f§7o§7r §b§lY§la§ln§lY§lu§lT§li§ln§lg§8 |§r §fb§fy§e §ew§fa§fl§fr§fu§fs§fo§fn§fe§f,§f §eA§ee§er§eM§ei§en§ei");
+        	e.getPlayer().sendMessage("§f ");
+			e.getPlayer().sendMessage("§3§lSkyWarsRel §r§7for §b§lYanYuTing §8|§r §f26-10-3");
+			e.getPlayer().sendMessage("§7originally by: §ewalrusone");
+			e.getPlayer().sendMessage("§7modified by: §eAerMini");
+			e.getPlayer().sendMessage("§d§lhttps://github.com/YanYuTingTeam/SkyWarsRel");
+			e.getPlayer().sendMessage("§f ");
         	return;
     	}
 		if (splited[0].equalsIgnoreCase("/shon")) {
