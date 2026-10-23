@@ -18,7 +18,9 @@ public class PlayerQuitListener implements Listener
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent a1) {
 		a1.setQuitMessage(null);
-		
+		PlayerStat.clearScoreboard(a1.getPlayer());
+		SkyWarsReloaded.getIC().destroyNow(a1.getPlayer());
+
 		final String id = a1.getPlayer().getUniqueId().toString();
 		Party party = Party.getParty(a1.getPlayer());
 		if (party != null) {

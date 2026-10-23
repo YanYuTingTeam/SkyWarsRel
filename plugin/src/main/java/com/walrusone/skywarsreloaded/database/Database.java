@@ -30,7 +30,7 @@ public class Database {
 	        password = SkyWarsReloaded.get().getConfig().getString("sqldatabase.password");
 
 	        try {
-	            Class.forName("com.mysql.jdbc.Driver");
+	            Class.forName("com.mysql.cj.jdbc.Driver");
 	            connect();
 
 	        } catch (SQLException sqlException) {
@@ -64,7 +64,7 @@ public class Database {
 	        return connection;
 	    }
 
-	    private void close() {
+	    public void close() {
 	        try {
 	            if (connection != null && !connection.isClosed()) {
 	                connection.close();

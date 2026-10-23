@@ -70,6 +70,12 @@ public class IconMenuController implements Listener {
         menu.remove(key);
     }
 
+    public void destroyNow(Player player) {
+        if (player != null) {
+            destroy(player);
+        }
+    }
+
     public boolean has(Player player) {
         return menu.containsKey(player);
     }

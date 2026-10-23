@@ -317,6 +317,7 @@ public class MatchManager
             public void run() {
                 if (gameMap.getMatchState() != MatchState.WAITINGSTART) {
                         this.cancel();
+                        return;
                 }
                 if (gameMap.getFullTeams() >= gameMap.getMinTeams() || gameMap.getForceStart()) {
                     if (gameMap.getTimer() <= 0) {
@@ -667,6 +668,9 @@ public class MatchManager
                 pData.restore(false);
                 PlayerData.getPlayerData().remove(pData);
         }
+        for (GameMap gMap : GameMap.getMaps()) {
+            gMap.getSpectators().remove(player.getUniqueId());
+        }
     }
 
     public void removeSpectator(Player player, boolean skipBungee) {
@@ -677,6 +681,9 @@ public class MatchManager
         if (pData != null) {
                 pData.restore(false, skipBungee);
                 PlayerData.getPlayerData().remove(pData);
+        }
+        for (GameMap gMap : GameMap.getMaps()) {
+            gMap.getSpectators().remove(player.getUniqueId());
         }
     }
     

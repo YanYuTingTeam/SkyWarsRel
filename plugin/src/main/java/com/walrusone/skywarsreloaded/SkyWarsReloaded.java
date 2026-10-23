@@ -28,7 +28,6 @@ import com.walrusone.skywarsreloaded.api.NMS;
 import com.walrusone.skywarsreloaded.commands.CmdManager;
 import com.walrusone.skywarsreloaded.commands.KitCmdManager;
 import com.walrusone.skywarsreloaded.commands.MapCmdManager;
-import com.walrusone.skywarsreloaded.commands.PartyCmdManager;
 import com.walrusone.skywarsreloaded.config.Config;
 import com.walrusone.skywarsreloaded.database.DataStorage;
 import com.walrusone.skywarsreloaded.database.Database;
@@ -66,7 +65,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	private Config config;
 	private ExtConfig extConfig;
 	private ShowDamageManager showDamageManager;
-	private static Database db;
+	private static volatile Database db;
 	private ChestManager cm;
 	private WorldManager wm;
 	private String servername;
@@ -250,7 +249,11 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         PlayerData.getPlayerData().clear();
         for (final PlayerStat fData : PlayerStat.getPlayers()) {
         	DataStorage.get().saveStats(fData);
-        }    
+        }
+        if (db != null) {
+            db.close();
+            db = null;
+        }
 	}
 	
 	public void load() {
@@ -312,9 +315,6 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         getCommand("skywars").setExecutor(new CmdManager());
         getCommand("swkit").setExecutor(new KitCmdManager());
         getCommand("swmap").setExecutor(new MapCmdManager());
-        if (config.partyEnabled()) {
-            getCommand("swparty").setExecutor(new PartyCmdManager());
-        }
         if (getCfg().borderEnabled()) {
         	if (specObserver != null) {
 				specObserver.cancel();
@@ -359,18 +359,42 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
     	return db;
     }
            
-    private void getFWDatabase() {
-    	try {
-			db = new Database();
-		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
-		}
-    	try {
-			db.createTables();
-		} catch (IOException | SQLException e) {
-			e.printStackTrace();
-		}
-    }
+	    private void getFWDatabase() {
+	    	new BukkitRunnable() {
+	            public void run() {
+	            	Database oldDb = db;
+	            	db = null;
+	                Database newDb;
+	                try {
+	                	newDb = new Database();
+	                } catch (ClassNotFoundException | SQLException e) {
+	                    e.printStackTrace();
+	                    if (oldDb != null) {
+	                        oldDb.close();
+	                    }
+	                    return;
+	                }
+	                try {
+	                    newDb.createTables();
+	                } catch (IOException | SQLException e) {
+	                    e.printStackTrace();
+	                    newDb.close();
+	                    if (oldDb != null) {
+	                        oldDb.close();
+	                    }
+	                    return;
+	                }
+	                if (oldDb != null) {
+	                    oldDb.close();
+	                }
+	                new BukkitRunnable() {
+	                    public void run() {
+	                        db = newDb;
+	                    }
+	                }.runTask(SkyWarsReloaded.get());
+	            }
+	        }.runTaskAsynchronously(this);
+	    }
 
 	public static ChestManager getCM() {
 		return instance.cm;
@@ -400,6 +424,10 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	    	try {
 				String header = msgin.readUTF();
 				if (header.equalsIgnoreCase("RequestUpdate")) {
+					if (GameMap.getMaps().isEmpty()) {
+						getLogger().warning("收到跨服状态请求但没有任何已加载的地图, 已忽略");
+						return;
+					}
 					String sendToServer = msgin.readUTF();
 					String playerCount = "" + GameMap.getMaps().get(0).getAlivePlayers().size();
 					String maxPlayers = "" + GameMap.getMaps().get(0).getMaxPlayers();

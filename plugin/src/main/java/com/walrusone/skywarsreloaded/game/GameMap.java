@@ -185,8 +185,12 @@ public class GameMap {
 
         public void checkSpectators() {
         if (!spectators.isEmpty()) {
-                for (UUID uuid: spectators) {
+                for (UUID uuid: new ArrayList<>(spectators)) {
                         Player spec = SkyWarsReloaded.get().getServer().getPlayer(uuid);
+                        if (spec == null) {
+                                spectators.remove(uuid);
+                                continue;
+                        }
                         if (isOutsideBorder(spec)) {
                                         CoordLoc ss = getSpectateSpawn();
                                         Location spectateSpawn = new Location(getCurrentWorld(), ss.getX(), ss.getY(), ss.getZ());

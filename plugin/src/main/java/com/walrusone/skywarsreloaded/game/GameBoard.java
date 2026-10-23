@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
 
 import java.io.File;
@@ -22,6 +23,7 @@ public class GameBoard {
     private Scoreboard scoreboard;
     private Objective objective;
     private int restartTimer;
+    private BukkitTask restartTask;
     private Map<ScoreVar, Integer> waitboard = new HashMap<>();
     private Map<ScoreVar, Integer> playboard = new HashMap<>();
     private Map<ScoreVar, Integer> endboard = new HashMap<>();
@@ -184,11 +186,11 @@ public class GameBoard {
     private void startRestartTimer() {
         restartTimer = SkyWarsReloaded.getCfg().getTimeAfterMatch();
         if (SkyWarsReloaded.get().isEnabled()) {
-            new BukkitRunnable() {
+            restartTask = new BukkitRunnable() {
                 @Override
                 public void run() {
                     restartTimer--;
-                    if (restartTimer == 0) {
+                    if (restartTimer <= 0) {
                         this.cancel();
                     }
                     updateScoreboardVar(ScoreVar.RESTARTTIME);
@@ -253,6 +255,10 @@ public class GameBoard {
     }
 
     public void setRestartTimer(int i) {
+        if (restartTask != null) {
+            restartTask.cancel();
+            restartTask = null;
+        }
         restartTimer = i;
     }
 }

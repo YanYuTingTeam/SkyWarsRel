@@ -9,10 +9,6 @@ commands:
       description: This is the main plugin command.
       aliases: [sw]
       usage: /<command> [args]
-   swparty:
-      description: This is the main party command.
-      aliases: [swp]
-      usage: /<command> [args]
    swkit:
       description: This is the main party command.
       aliases: [swk]

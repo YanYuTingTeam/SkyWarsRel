@@ -420,7 +420,11 @@ public class PlayerStat
 	private static Scoreboard getPlayerScoreboard(Player player) {
 		return scoreboards.get(player);
 	}
-	
+
+	public static void clearScoreboard(Player player) {
+		scoreboards.remove(player);
+	}
+
 	public PermissionAttachment getPerms() {
 		return perms;
 	}

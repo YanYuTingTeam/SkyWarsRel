@@ -44,8 +44,8 @@ public class DataStorage {
 	            }
 
 	            File playerFile = new File(playerDataDirectory, pData.getId() + ".yml");
-	            if (!playerFile.exists()) {
-	            	SkyWarsReloaded.get().getLogger().info("File doesn't exist!");
+	            if (!playerFile.exists() && !playerFile.createNewFile()) {
+	            	SkyWarsReloaded.get().getLogger().info("Failed to create playerfile for: " + pData.getId());
 	            	return;
 	            }
 
@@ -72,6 +72,9 @@ public class DataStorage {
 	        }
 		} else {
             Database database = SkyWarsReloaded.getDb();
+            if (database == null) {
+                return;
+            }
 
             if (database.checkConnection()) {
                 return;
@@ -123,13 +126,17 @@ public class DataStorage {
 			public void run() {
 				boolean sqlEnabled = SkyWarsReloaded.get().getConfig().getBoolean("sqldatabase.enabled");
 				if (sqlEnabled) {
-			                Database database = SkyWarsReloaded.getDb();
+	                Database database = SkyWarsReloaded.getDb();
+	                if (database == null) {
+	                    pData.setInitialized(true);
+	                    return;
+	                }
 
-			                if (database.checkConnection()) {
-			                    return;
-			                }
+	                if (database.checkConnection()) {
+	                    return;
+	                }
 
-			                if (!database.doesPlayerExist(pData.getId())) {
+	                if (!database.doesPlayerExist(pData.getId())) {
 			                    database.createNewPlayer(pData.getId(), pData.getPlayerName());
 		                        pData.setWins(0);
 		                        pData.setLosts(0);
@@ -267,6 +274,9 @@ public class DataStorage {
 	        }
 		} else {
             Database database = SkyWarsReloaded.getDb();
+            if (database == null) {
+                return;
+            }
 
             if (database.checkConnection()) {
                 return;
@@ -304,6 +314,9 @@ public class DataStorage {
 				boolean sqlEnabled = SkyWarsReloaded.get().getConfig().getBoolean("sqldatabase.enabled");
 				if (sqlEnabled) {
 		            Database database = SkyWarsReloaded.getDb();
+		            if (database == null) {
+		                return;
+		            }
 
 		            if (database.checkConnection()) {
 		                return;
@@ -390,6 +403,9 @@ public class DataStorage {
 					}
 				} else {
 					Database database = SkyWarsReloaded.getDb();
+	                if (database == null) {
+	                    return;
+	                }
 	                if (database.checkConnection()) {
 	                    return;
 	                }
@@ -462,6 +478,9 @@ public class DataStorage {
 				} else {
 					if (playerStat.getPerms().getPermissions().size() > 0) {
 						Database database = SkyWarsReloaded.getDb();
+		                if (database == null) {
+		                    return;
+		                }
 		                if (database.checkConnection()) {
 		                    return;
 		                }

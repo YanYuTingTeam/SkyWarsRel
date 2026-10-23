@@ -119,6 +119,10 @@ public class PlayerCard {
 	
 	public void calculateELO() {
 	        int n = tCard.getGameMap().getPlayerCount();
+	        if (n <= 1) {
+	            this.postElo = this.preElo;
+	            return;
+	        }
 	        float K = 32 / (float)(n - 1);
 	        
 	            int curPlace = tCard.getPlace();
