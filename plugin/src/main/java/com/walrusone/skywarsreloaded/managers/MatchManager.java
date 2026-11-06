@@ -614,7 +614,7 @@ public class MatchManager
             new BukkitRunnable() {
                 public void run() {
                                         java.util.Set<UUID> processedAsSpectator = new java.util.HashSet<>(gameMap.getSpectators());
-                        for (final UUID uuid: gameMap.getSpectators()) {
+                        for (final UUID uuid: new java.util.HashSet<>(gameMap.getSpectators())) {
                                 final Player player = SkyWarsReloaded.get().getServer().getPlayer(uuid);
                                 if (player != null) {
                                 if (isInOtherGame(player, gameMap)) {

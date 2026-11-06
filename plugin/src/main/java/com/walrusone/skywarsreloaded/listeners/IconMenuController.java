@@ -103,7 +103,7 @@ public class IconMenuController implements Listener {
         	new BukkitRunnable() {
 				@Override
 				public void run() {
-					if (menu.get(event.getPlayer()).getInventories().contains(event.getPlayer().getOpenInventory())) {
+                    if (menu.get(event.getPlayer()) != null && menu.get(event.getPlayer()).getInventories().contains(event.getPlayer().getOpenInventory())) {
 						destroy(((Player) event.getPlayer()));
 					}
 				}
