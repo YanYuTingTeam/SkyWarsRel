@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.commands.BaseCmd;
@@ -48,7 +49,12 @@ public class SetStatsCmd extends BaseCmd {
                                 int currentValue = pStat.getWins();
                                 int newValue = getNewValue(method, currentValue, value);
                                 pStat.setWins(newValue);
-                                DataStorage.get().saveStats(pStat);
+                                new BukkitRunnable() {
+                                	@Override
+                                	public void run() {
+                                		DataStorage.get().saveStats(pStat);
+                                	}
+                                }.runTaskAsynchronously(SkyWarsReloaded.get());
                                 sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                         .setVariable("stat", stat).setVariable("amount", "" + newValue).format("command.setstat"));
                             } else {
@@ -64,7 +70,12 @@ public class SetStatsCmd extends BaseCmd {
                                 int currentValue = pStat.getLosses();
                                 int newValue = getNewValue(method, currentValue, value);
                                 pStat.setLosts(newValue);
-                                DataStorage.get().saveStats(pStat);
+                                new BukkitRunnable() {
+                                	@Override
+                                	public void run() {
+                                		DataStorage.get().saveStats(pStat);
+                                	}
+                                }.runTaskAsynchronously(SkyWarsReloaded.get());
                                 sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                         .setVariable("stat", stat).setVariable("amount", "" + newValue).format("command.setstat"));
                             } else {
@@ -80,7 +91,12 @@ public class SetStatsCmd extends BaseCmd {
                                 int currentValue = pStat.getKills();
                                 int newValue = getNewValue(method, currentValue, value);
                                 pStat.setKills(newValue);
-                                DataStorage.get().saveStats(pStat);
+                                new BukkitRunnable() {
+                                	@Override
+                                	public void run() {
+                                		DataStorage.get().saveStats(pStat);
+                                	}
+                                }.runTaskAsynchronously(SkyWarsReloaded.get());
                                 sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                         .setVariable("stat", stat).setVariable("amount", "" + newValue).format("command.setstat"));
                             } else {
@@ -96,7 +112,12 @@ public class SetStatsCmd extends BaseCmd {
                                 int currentValue = pStat.getDeaths();
                                 int newValue = getNewValue(method, currentValue, value);
                                 pStat.setDeaths(newValue);
-                                DataStorage.get().saveStats(pStat);
+                                new BukkitRunnable() {
+                                	@Override
+                                	public void run() {
+                                		DataStorage.get().saveStats(pStat);
+                                	}
+                                }.runTaskAsynchronously(SkyWarsReloaded.get());
                                 sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                         .setVariable("stat", stat).setVariable("amount", "" + newValue).format("command.setstat"));
                             } else {
@@ -114,7 +135,12 @@ public class SetStatsCmd extends BaseCmd {
                                     int currentValue = pStat.getElo();
                                     int newValue = getNewValue(method, currentValue, value);
                                     pStat.setElo(newValue);
-                                    DataStorage.get().saveStats(pStat);
+                                    new BukkitRunnable() {
+                                    	@Override
+                                    	public void run() {
+                                    		DataStorage.get().saveStats(pStat);
+                                    	}
+                                    }.runTaskAsynchronously(SkyWarsReloaded.get());
                                     sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                             .setVariable("stat", stat).setVariable("amount", "" + newValue).format("command.setstat"));
                                 } else {
@@ -133,7 +159,12 @@ public class SetStatsCmd extends BaseCmd {
                                 int currentValue = pStat.getXp();
                                 int newValue = getNewValue(method, currentValue, value);
                                 pStat.setXp(newValue);
-                                DataStorage.get().saveStats(pStat);
+                                new BukkitRunnable() {
+                                	@Override
+                                	public void run() {
+                                		DataStorage.get().saveStats(pStat);
+                                	}
+                                }.runTaskAsynchronously(SkyWarsReloaded.get());
                                 if (SkyWarsReloaded.getCfg().displayPlayerExeperience()) {
                                     Util.get().setPlayerExperience(swPlayer, newValue);
                                 }
@@ -148,7 +179,12 @@ public class SetStatsCmd extends BaseCmd {
                     } else if (args[2].equalsIgnoreCase("pareffect")) {
                         if (ParticleEffectOption.getPlayerOptionByKey(args[3]) != null) {
                             pStat.setParticleEffect(args[3].toLowerCase());
-                            DataStorage.get().saveStats(pStat);
+                            new BukkitRunnable() {
+                            	@Override
+                            	public void run() {
+                            		DataStorage.get().saveStats(pStat);
+                            	}
+                            }.runTaskAsynchronously(SkyWarsReloaded.get());
                             sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                     .setVariable("stat", args[2]).setVariable("amount", args[3]).format("command.setstat"));
                         } else {
@@ -157,7 +193,12 @@ public class SetStatsCmd extends BaseCmd {
                     } else if (args[2].equalsIgnoreCase("proeffect")) {
                         if (ProjectileEffectOption.getPlayerOptionByKey(args[3]) != null) {
                             pStat.setProjectileEffect(args[3].toLowerCase());
-                            DataStorage.get().saveStats(pStat);
+                            new BukkitRunnable() {
+                            	@Override
+                            	public void run() {
+                            		DataStorage.get().saveStats(pStat);
+                            	}
+                            }.runTaskAsynchronously(SkyWarsReloaded.get());
                             sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                     .setVariable("stat", args[2]).setVariable("amount", args[3]).format("command.setstat"));
                         } else {
@@ -166,7 +207,12 @@ public class SetStatsCmd extends BaseCmd {
                     } else if (args[2].equalsIgnoreCase("glasscolor")) {
                         if (Util.get().getByteFromColor(args[3]) != -1) {
                             pStat.setGlassColor(args[3].toLowerCase());
-                            DataStorage.get().saveStats(pStat);
+                            new BukkitRunnable() {
+                            	@Override
+                            	public void run() {
+                            		DataStorage.get().saveStats(pStat);
+                            	}
+                            }.runTaskAsynchronously(SkyWarsReloaded.get());
                             sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                     .setVariable("stat", args[2]).setVariable("amount", args[3]).format("command.setstat"));
                         } else {
@@ -177,7 +223,12 @@ public class SetStatsCmd extends BaseCmd {
                             @SuppressWarnings("unused")
                             Sound sound = Sound.valueOf(args[3].toUpperCase());
                             pStat.setKillSound(args[3].toUpperCase());
-                            DataStorage.get().saveStats(pStat);
+                            new BukkitRunnable() {
+                            	@Override
+                            	public void run() {
+                            		DataStorage.get().saveStats(pStat);
+                            	}
+                            }.runTaskAsynchronously(SkyWarsReloaded.get());
                             sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                     .setVariable("stat", args[2]).setVariable("amount", args[3]).format("command.setstat"));
                         } catch (IllegalArgumentException e) {
@@ -188,7 +239,12 @@ public class SetStatsCmd extends BaseCmd {
                             @SuppressWarnings("unused")
                             Sound sound = Sound.valueOf(args[3].toUpperCase());
                             pStat.setWinSound(args[3].toUpperCase());
-                            DataStorage.get().saveStats(pStat);
+                            new BukkitRunnable() {
+                            	@Override
+                            	public void run() {
+                            		DataStorage.get().saveStats(pStat);
+                            	}
+                            }.runTaskAsynchronously(SkyWarsReloaded.get());
                             sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", args[1])
                                     .setVariable("stat", args[2]).setVariable("amount", args[3]).format("command.setstat"));
                         } catch (IllegalArgumentException e) {

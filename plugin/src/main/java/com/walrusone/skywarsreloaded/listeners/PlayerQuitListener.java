@@ -4,6 +4,7 @@ import com.walrusone.skywarsreloaded.utilities.Party;
 import org.bukkit.event.EventHandler;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.database.DataStorage;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
@@ -28,6 +29,15 @@ public class PlayerQuitListener implements Listener
 		}
 		final GameMap gameMap = MatchManager.get().getPlayerMap(a1.getPlayer());
 		if (gameMap == null) {
+			final PlayerStat statNoGame = PlayerStat.getPlayerStats(id);
+			if (statNoGame != null) {
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						DataStorage.get().saveStats(statNoGame);
+					}
+				}.runTaskAsynchronously(SkyWarsReloaded.get());
+			}
 			new BukkitRunnable() {
 				@Override
 				public void run() {
@@ -35,6 +45,16 @@ public class PlayerQuitListener implements Listener
 				}
 			}.runTaskLater(SkyWarsReloaded.get(), 5);
 			return;
+		}
+
+		final PlayerStat statBeforeLeave = PlayerStat.getPlayerStats(id);
+		if (statBeforeLeave != null) {
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					DataStorage.get().saveStats(statBeforeLeave);
+				}
+			}.runTaskAsynchronously(SkyWarsReloaded.get());
 		}
 
 		MatchManager.get().playerLeave(a1.getPlayer(), DamageCause.CUSTOM, true, true, true);

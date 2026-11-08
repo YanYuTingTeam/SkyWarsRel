@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.walrusone.skywarsreloaded.listeners.*;
 import com.walrusone.skywarsreloaded.menus.*;
@@ -247,10 +249,25 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
             playerData.restore(false);
         }
         PlayerData.getPlayerData().clear();
-        for (final PlayerStat fData : PlayerStat.getPlayers()) {
-        	DataStorage.get().saveStats(fData);
+        final ArrayList<PlayerStat> snapshot = new ArrayList<>(PlayerStat.getPlayers());
+        final CountDownLatch latch = new CountDownLatch(1);
+        new BukkitRunnable() {
+            public void run() {
+                try {
+                    for (final PlayerStat fData : snapshot) {
+                        DataStorage.get().saveStats(fData);
+                    }
+                } finally {
+                    latch.countDown();
+                }
+            }
+        }.runTaskAsynchronously(this);
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
         }
         if (db != null) {
+            getLogger().info("Database closed");
             db.close();
             db = null;
         }
@@ -369,6 +386,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	                	newDb = new Database();
 	                } catch (ClassNotFoundException | SQLException e) {
 	                    e.printStackTrace();
+	                    getLogger().warning("MySQL init failed, driver com.mysql.cj.jdbc.Driver host " + getConfig().getString("sqldatabase.hostname") + ":" + getConfig().getInt("sqldatabase.port") + " reason " + e.toString() + ", db is null, upstream will fail silently");
 	                    if (oldDb != null) {
 	                        oldDb.close();
 	                    }
@@ -378,6 +396,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	                    newDb.createTables();
 	                } catch (IOException | SQLException e) {
 	                    e.printStackTrace();
+	                    getLogger().warning("MySQL init failed, driver com.mysql.cj.jdbc.Driver host " + getConfig().getString("sqldatabase.hostname") + ":" + getConfig().getInt("sqldatabase.port") + " reason " + e.toString() + ", db is null, upstream will fail silently");
 	                    newDb.close();
 	                    if (oldDb != null) {
 	                        oldDb.close();
@@ -390,6 +409,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 	                new BukkitRunnable() {
 	                    public void run() {
 	                        db = newDb;
+	                        getLogger().info("Database connected");
 	                    }
 	                }.runTask(SkyWarsReloaded.get());
 	            }

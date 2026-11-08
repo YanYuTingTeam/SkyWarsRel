@@ -10,7 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,6 +26,27 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 public class DataStorage {
 
 	private static DataStorage instance;
+
+	private final ConcurrentHashMap<UUID, PendingWrite> dirtyQueue = new ConcurrentHashMap<>();
+
+	static class PendingWrite {
+		UUID uuid;
+		String playerName;
+		int wins;
+		int losses;
+		int kills;
+		int deaths;
+		int elo;
+		int xp;
+		int runcount;
+		String pareffect;
+		String proeffect;
+		String glasscolor;
+		String killsound;
+		String winsound;
+		String taunt;
+		boolean initialized;
+	}
 	
     public static DataStorage get() {
         if (DataStorage.instance == null) {
@@ -31,9 +54,84 @@ public class DataStorage {
         }
         return DataStorage.instance;
     }
+
+	public void flushQueue() {
+		if (dirtyQueue.isEmpty() || !SkyWarsReloaded.get().getConfig().getBoolean("sqldatabase.enabled")) {
+			return;
+		}
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				for (Map.Entry<UUID, PendingWrite> entry : new ArrayList<>(dirtyQueue.entrySet())) {
+					PendingWrite write = entry.getValue();
+					if (write == null || !write.initialized) {
+						dirtyQueue.remove(entry.getKey(), write);
+						continue;
+					}
+					Database database = SkyWarsReloaded.getDb();
+					if (database == null || database.checkConnection()) {
+						SkyWarsReloaded.get().getLogger().warning("Database not ready, skip flushQueue for " + entry.getKey());
+						continue;
+					}
+					String query = "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `elo` = ?, `xp` = ?, `runcount` = ?, `pareffect` = ?, " +
+							"`proeffect` = ?, `glasscolor` = ?,`killsound` = ?, `winsound` = ?, `taunt` = ? WHERE `uuid` = ?;";
+					try (Connection connection = database.getConnection();
+							PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+						preparedStatement.setString(1, write.playerName);
+						preparedStatement.setInt(2, write.wins);
+						preparedStatement.setInt(3, write.losses);
+						preparedStatement.setInt(4, write.kills);
+						preparedStatement.setInt(5, write.deaths);
+						preparedStatement.setInt(6, write.elo);
+						preparedStatement.setInt(7, write.xp);
+						preparedStatement.setInt(8, write.runcount);
+						preparedStatement.setString(9, write.pareffect);
+						preparedStatement.setString(10, write.proeffect);
+						preparedStatement.setString(11, write.glasscolor);
+						preparedStatement.setString(12, write.killsound);
+						preparedStatement.setString(13, write.winsound);
+						preparedStatement.setString(14, write.taunt);
+						preparedStatement.setString(15, write.uuid.toString());
+						preparedStatement.executeUpdate();
+					} catch (final SQLException sqlException) {
+						sqlException.printStackTrace();
+						SkyWarsReloaded.get().getLogger().warning("flushQueue failed for " + entry.getKey());
+						continue;
+					}
+					dirtyQueue.remove(entry.getKey(), write);
+				}
+			}
+		}.runTaskAsynchronously(SkyWarsReloaded.get());
+	}
     
 	public void saveStats(final PlayerStat pData) {
 		boolean sqlEnabled = SkyWarsReloaded.get().getConfig().getBoolean("sqldatabase.enabled");
+		if (sqlEnabled) {
+			try {
+				PendingWrite snapshot = new PendingWrite();
+				snapshot.uuid = UUID.fromString(pData.getId());
+				snapshot.playerName = pData.getPlayerName();
+				snapshot.wins = pData.getWins();
+				snapshot.losses = pData.getLosses();
+				snapshot.kills = pData.getKills();
+				snapshot.deaths = pData.getDeaths();
+				snapshot.elo = pData.getElo();
+				snapshot.xp = pData.getXp();
+				snapshot.runcount = pData.getRunCount();
+				snapshot.pareffect = pData.getParticleEffect();
+				snapshot.proeffect = pData.getProjectileEffect();
+				snapshot.glasscolor = pData.getGlassColor();
+				snapshot.killsound = pData.getKillSound();
+				snapshot.winsound = pData.getWinSound();
+				snapshot.taunt = pData.getTaunt();
+				snapshot.initialized = pData.isInitialized();
+				if (!snapshot.initialized) {
+					return;
+				}
+				dirtyQueue.put(snapshot.uuid, snapshot);
+			} catch (final IllegalArgumentException ignored) {
+			}
+		}
 		if (!sqlEnabled) {
 			try {
 	            File dataDirectory = SkyWarsReloaded.get().getDataFolder();
@@ -70,52 +168,6 @@ public class DataStorage {
 	        } catch (IOException ioException) {
 	            System.out.println("Failed to load faction " + pData.getId() + ": " + ioException.getMessage());
 	        }
-		} else {
-            Database database = SkyWarsReloaded.getDb();
-            if (database == null) {
-                return;
-            }
-
-            if (database.checkConnection()) {
-                return;
-            }
-
-            Connection connection = database.getConnection();
-            PreparedStatement preparedStatement = null;
-
-            try {
-            	 String query = "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `elo` = ?, `xp` = ?, `runcount` = ?, `pareffect` = ?, " +
-						 "`proeffect` = ?, `glasscolor` = ?,`killsound` = ?, `winsound` = ?, `taunt` = ? WHERE `uuid` = ?;";
-                 
-                 preparedStatement = connection.prepareStatement(query);
-                 preparedStatement.setString(1, pData.getPlayerName());
-                 preparedStatement.setInt(2, pData.getWins());
-                 preparedStatement.setInt(3, pData.getLosses());
-                 preparedStatement.setInt(4, pData.getKills());
-                 preparedStatement.setInt(5, pData.getDeaths());
-                 preparedStatement.setInt(6, pData.getElo());
-                 preparedStatement.setInt(7, pData.getXp());
-                 preparedStatement.setInt(8, pData.getRunCount());
-                 preparedStatement.setString(9, pData.getParticleEffect());
-                 preparedStatement.setString(10, pData.getProjectileEffect());
-                 preparedStatement.setString(11, pData.getGlassColor());
-                 preparedStatement.setString(12, pData.getKillSound());
-                 preparedStatement.setString(13, pData.getWinSound());
-                 preparedStatement.setString(14, pData.getTaunt());
-                 preparedStatement.setString(15, pData.getId());
-                 preparedStatement.executeUpdate();
-
-            } catch (final SQLException sqlException) {
-                sqlException.printStackTrace();
-
-            } finally {
-                if (preparedStatement != null) {
-                    try {
-                        preparedStatement.close();
-                    } catch (final SQLException ignored) {
-                    }
-                }
-            }
 		}
     }
 
@@ -136,69 +188,56 @@ public class DataStorage {
 	                    return;
 	                }
 
-	                if (!database.doesPlayerExist(pData.getId())) {
-			                    database.createNewPlayer(pData.getId(), pData.getPlayerName());
-		                        pData.setWins(0);
-		                        pData.setLosts(0);
-		                        pData.setKills(0);
-		                        pData.setDeaths(0);
-		                        pData.setElo(1500);
-		                        pData.setXp(0);
-		                        pData.setRunCount(0);
-		                        pData.setParticleEffect("none");
-		                        pData.setProjectileEffect("none");
-		                        pData.setGlassColor("none");
-		                        pData.setKillSound("none");
-		                        pData.setWinSound("none");
-		                        pData.setTaunt("none");
-			                } else {
-			                    Connection connection = database.getConnection();
-			                    PreparedStatement preparedStatement = null;
-			                    ResultSet resultSet = null;
+                try {
+                if (!database.doesPlayerExist(pData.getId())) {
+                    database.createNewPlayer(pData.getId(), pData.getPlayerName());
+                        pData.setWins(0);
+                        pData.setLosts(0);
+                        pData.setKills(0);
+                        pData.setDeaths(0);
+                        pData.setElo(1500);
+                        pData.setXp(0);
+                        pData.setRunCount(0);
+                        pData.setParticleEffect("none");
+                        pData.setProjectileEffect("none");
+                        pData.setGlassColor("none");
+                        pData.setKillSound("none");
+                        pData.setWinSound("none");
+                        pData.setTaunt("none");
+                } else {
+                    String query = "SELECT `wins`, `losses`, `kills`, `deaths`, `elo`, `xp`, `runcount`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt` " +
+							"FROM `sw_player` WHERE `uuid` = ? LIMIT 1;";
 
-			                    try {
-			                        String query = "SELECT `wins`, `losses`, `kills`, `deaths`, `elo`, `xp`, `runcount`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt` " +
-											"FROM `sw_player` WHERE `uuid` = ? LIMIT 1;";
+                    try (Connection connection = database.getConnection();
+                            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                        preparedStatement.setString(1, pData.getId());
+                        ResultSet resultSet = preparedStatement.executeQuery();
 
-			                        preparedStatement = connection.prepareStatement(query);
-			                        preparedStatement.setString(1, pData.getId());
-			                        resultSet = preparedStatement.executeQuery();
+                        if (resultSet != null && resultSet.next()) {
+                            pData.setWins(resultSet.getInt("wins"));
+                            pData.setLosts(resultSet.getInt("losses"));
+                            pData.setKills(resultSet.getInt("kills"));
+                            pData.setDeaths(resultSet.getInt("deaths"));
+                            pData.setElo(resultSet.getInt("elo"));
+                            pData.setXp(resultSet.getInt("xp"));
+                            pData.setRunCount(resultSet.getInt("runcount"));
+                            pData.setParticleEffect(resultSet.getString("pareffect"));
+                            pData.setProjectileEffect(resultSet.getString("proeffect"));
+                            pData.setGlassColor(resultSet.getString("glasscolor"));
+                            pData.setKillSound(resultSet.getString("killsound"));
+                            pData.setWinSound(resultSet.getString("winsound"));
+                            pData.setTaunt(resultSet.getString("taunt"));
+                        }
 
-			                        if (resultSet != null && resultSet.next()) {
-			                            pData.setWins(resultSet.getInt("wins"));
-			                            pData.setLosts(resultSet.getInt("losses"));
-			                            pData.setKills(resultSet.getInt("kills"));
-			                            pData.setDeaths(resultSet.getInt("deaths"));
-			                            pData.setElo(resultSet.getInt("elo"));
-			                            pData.setXp(resultSet.getInt("xp"));
-			                            pData.setRunCount(resultSet.getInt("runcount"));
-			                            pData.setParticleEffect(resultSet.getString("pareffect"));
-			                            pData.setProjectileEffect(resultSet.getString("proeffect"));
-			                            pData.setGlassColor(resultSet.getString("glasscolor"));
-			                            pData.setKillSound(resultSet.getString("killsound"));
-			                            pData.setWinSound(resultSet.getString("winsound"));
-			                            pData.setTaunt(resultSet.getString("taunt"));
-			                        }
+                    } catch (final SQLException sqlException) {
+                        sqlException.printStackTrace();
 
-			                    } catch (final SQLException sqlException) {
-			                        sqlException.printStackTrace();
+                    }
+                }
+                } catch (final SQLException sqlException) {
+                    sqlException.printStackTrace();
 
-			                    } finally {
-			                        if (resultSet != null) {
-			                            try {
-			                                resultSet.close();
-			                            } catch (final SQLException ignored) {
-			                            }
-			                        }
-
-			                        if (preparedStatement != null) {
-			                            try {
-			                                preparedStatement.close();
-			                            } catch (final SQLException ignored) {
-			                            }
-			                        }
-			                    }
-			                }
+                }
 				} else {
 			    			try {
 			    	            File dataDirectory = SkyWarsReloaded.get().getDataFolder();
@@ -282,26 +321,16 @@ public class DataStorage {
                 return;
             }
 
-            Connection connection = database.getConnection();
-            PreparedStatement preparedStatement = null;
+            String query = "DELETE FROM `sw_player` WHERE `uuid` = ?;";
 
-            try {
-            	 String query = "DELETE FROM `sw_player` WHERE `uuid` = ?;";
-
-                 preparedStatement = connection.prepareStatement(query);
+            try (Connection connection = database.getConnection();
+                    PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                  preparedStatement.setString(1, uuid);
                  preparedStatement.executeUpdate();
 
             } catch (final SQLException sqlException) {
                 sqlException.printStackTrace();
 
-            } finally {
-                if (preparedStatement != null) {
-                    try {
-                        preparedStatement.close();
-                    } catch (final SQLException ignored) {
-                    }
-                }
             }
 		}
 	}
@@ -322,16 +351,12 @@ public class DataStorage {
 		                return;
 		            }
 
-		            Connection connection = database.getConnection();
-		            PreparedStatement preparedStatement;
-		            ResultSet resultSet;
-
-		            try {
-		        		String query = "SELECT `uuid`, `wins`, `losses`, `kills`, `deaths`, `elo`, `xp` FROM `sw_player` GROUP BY `uuid` " +
+		            String query = "SELECT `uuid`, `wins`, `losses`, `kills`, `deaths`, `elo`, `xp` FROM `sw_player` GROUP BY `uuid` " +
 								"ORDER BY `" + type.toString().toLowerCase() + "` DESC LIMIT " + size + ";";
 		                
-		                preparedStatement = connection.prepareStatement(query);
-		                resultSet = preparedStatement.executeQuery();
+		            try (Connection connection = database.getConnection();
+		                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+		                    ResultSet resultSet = preparedStatement.executeQuery()) {
 		                SkyWarsReloaded.getLB().resetLeader(type);
 		                while (resultSet.next()) {
 		                	SkyWarsReloaded.getLB().addLeader(type, resultSet.getString(1), Bukkit.getOfflinePlayer(UUID.fromString(resultSet.getString(1))).getName(), resultSet.getInt(2), resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5), resultSet.getInt(6), resultSet.getInt(7));
@@ -409,16 +434,12 @@ public class DataStorage {
 	                if (database.checkConnection()) {
 	                    return;
 	                }
-	                Connection connection = database.getConnection();
-	                PreparedStatement preparedStatement = null;
-	                ResultSet resultSet = null;
+	                String query= "SELECT `permissions` FROM `sw_permissions` WHERE `uuid` = ?;";
 
-	                try {
-	                    String query= "SELECT `permissions` FROM `sw_permissions` WHERE `uuid` = ?;";
-
-	                    preparedStatement = connection.prepareStatement(query);
+	                try (Connection connection = database.getConnection();
+	                        PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 	                    preparedStatement.setString(1, playerStat.getId());
-	                    resultSet = preparedStatement.executeQuery();
+	                    ResultSet resultSet = preparedStatement.executeQuery();
 	                    
 	                    while (resultSet != null && resultSet.next()) {
 	                    	playerStat.addPerm(resultSet.getString("permissions"), false);
@@ -426,19 +447,6 @@ public class DataStorage {
 	                } catch (final SQLException sqlException) {
 	                    sqlException.printStackTrace();
 
-	                } finally {
-	                    if (resultSet != null) {
-	                        try {
-	                            resultSet.close();
-	                        } catch (final SQLException ignored) {
-	                        }
-	                    }
-	                    if (preparedStatement != null) {
-	                        try {
-	                            preparedStatement.close();
-	                        } catch (final SQLException ignored) {
-	                        }
-	                    }
 	                }
 				}
 			}
@@ -484,30 +492,21 @@ public class DataStorage {
 		                if (database.checkConnection()) {
 		                    return;
 		                }
-						Connection connection = database.getConnection();
-						PreparedStatement preparedStatement = null;
-			            try {
+			            String query = "INSERT INTO `sw_permissions` (`uuid`, `playername`, `permissions`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE " +
+					"`uuid`=`uuid`, `playername`=`playername`, `permissions`=`permissions` ";
+			            try (Connection connection = database.getConnection()) {
 			            	if (playerStat.getPerms().getPermissions().size() >= 1) {
 			                	for (String perm: playerStat.getPerms().getPermissions().keySet()) {
-			                		String query = "INSERT INTO `sw_permissions` (`uuid`, `playername`, `permissions`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE " +
-											"`uuid`=`uuid`, `playername`=`playername`, `permissions`=`permissions` ";
-			                        
-			                        preparedStatement = connection.prepareStatement(query);
+			                	    try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 			                        preparedStatement.setString(1, playerStat.getId());
 			                        preparedStatement.setString(2, playerStat.getPlayerName());
 			                        preparedStatement.setString(3, perm);
 			                        preparedStatement.executeUpdate();
+			                	    }
 			                	}
 			            	}
 			            } catch (final SQLException sqlException) {
 			                sqlException.printStackTrace();
-			            } finally {
-			                if (preparedStatement != null) {
-			                    try {
-			                        preparedStatement.close();
-			                    } catch (final SQLException ignored) {
-			                    }
-			                }
 			            }
 					}
 				}

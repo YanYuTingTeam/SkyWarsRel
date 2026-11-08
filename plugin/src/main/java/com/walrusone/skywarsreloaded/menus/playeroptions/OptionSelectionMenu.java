@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.collect.Lists;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
@@ -157,7 +158,12 @@ public class OptionSelectionMenu {
 
             PlayerStat ps = PlayerStat.getPlayerStats(player);
             option.setEffect(ps);
-            DataStorage.get().saveStats(ps);
+            new BukkitRunnable() {
+            	@Override
+            	public void run() {
+            		DataStorage.get().saveStats(ps);
+            	}
+            }.runTaskAsynchronously(SkyWarsReloaded.get());
             Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getConfirmeSelctionSound(), 1, 1);
             player.sendMessage(option.getUseMessage());
             new OptionsSelectionMenu(player);

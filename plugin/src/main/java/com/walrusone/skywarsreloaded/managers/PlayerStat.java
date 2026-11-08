@@ -20,12 +20,15 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerStat
 {
     
-	private static ArrayList<PlayerStat> players;
+	private static ConcurrentHashMap<String, PlayerStat> players = new ConcurrentHashMap<>();
+	private static final int MAX_RETRY = 30;
 	private static HashMap<Player, Scoreboard> scoreboards = new HashMap<>();
     private final String uuid;
     private String playername;
@@ -50,6 +53,7 @@ public class PlayerStat
         this.uuid = player.getUniqueId().toString();
         this.playername = player.getName();
         this.perms = player.addAttachment(SkyWarsReloaded.get());
+        players.put(this.uuid, this);
         DataStorage.get().loadStats(this);
         if (SkyWarsReloaded.getCfg().economyEnabled()) {
             DataStorage.get().loadperms(this);
@@ -63,36 +67,50 @@ public class PlayerStat
     }
     
     private void saveStats(final String uuid) {
+        saveStats(uuid, 0);
+    }
+
+    private void saveStats(final String uuid, final int retry) {
     	new BukkitRunnable() {
             public void run() {
             	PlayerStat ps = PlayerStat.getPlayerStats(uuid);
-            	if (ps == null) {
-            		this.cancel();
-            	} else if (ps.isInitialized()) {
+            	if (ps == null || !ps.isInitialized()) {
+            		if (retry >= MAX_RETRY) {
+            			SkyWarsReloaded.get().getLogger().warning("saveStats retry limit reached for " + uuid);
+            			this.cancel();
+            		} else {
+            			saveStats(uuid, retry + 1);
+            		}
+            	} else {
             		new BukkitRunnable() {
 						@Override
 						public void run() {
-		            		if (SkyWarsReloaded.getCfg().bungeeMode()) {
-		                		Player player = SkyWarsReloaded.get().getServer().getPlayer(UUID.fromString(uuid));
-		                		if (player != null && MatchManager.get().getPlayerMap(player) == null) {
-		                			boolean joined = MatchManager.get().joinGame(player, GameType.ALL);
-		                			if (!joined) {
-		                    			SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());
-		                    		}
-		                		}
+			            		if (SkyWarsReloaded.getCfg().bungeeMode()) {
+			                		Player player = SkyWarsReloaded.get().getServer().getPlayer(UUID.fromString(uuid));
+			                		if (player != null && MatchManager.get().getPlayerMap(player) == null) {
+			                			boolean joined = MatchManager.get().joinGame(player, GameType.ALL);
+			                			if (!joined) {
+			                    			SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());
+			                    		}
+			                		}
+								}
+							PlayerStat stat = PlayerStat.getPlayerStats(uuid);
+							if (stat != null) {
+								DataStorage.get().saveStats(stat);
+								DataStorage.get().flushQueue();
 							}
 						}
 					}.runTask(SkyWarsReloaded.get());
-
-					DataStorage.get().saveStats(PlayerStat.getPlayerStats(uuid));
-				} else {
-					saveStats(uuid);
-				}
 			}
+		}
 		}.runTaskLaterAsynchronously(SkyWarsReloaded.get(), 10L);
     }
     
     public static void updatePlayer(final String uuid) {
+        updatePlayer(uuid, 0);
+    }
+
+    private static void updatePlayer(final String uuid, final int retry) {
     	new BukkitRunnable() {
             public void run() {
                 PlayerStat ps = PlayerStat.getPlayerStats(uuid);
@@ -142,47 +160,52 @@ public class PlayerStat
             		} else {
             			this.cancel();
             		}
+            	} else if (retry >= MAX_RETRY) {
+            		SkyWarsReloaded.get().getLogger().warning("updatePlayer retry limit reached for " + uuid);
+            		this.cancel();
             	} else {
-            		updatePlayer(uuid);
+            		updatePlayer(uuid, retry + 1);
             	}
             }
         }.runTaskLaterAsynchronously(SkyWarsReloaded.get(), 10L);
     }
        
-    public static ArrayList<PlayerStat> getPlayers() {
-        return PlayerStat.players;
+    public static Collection<PlayerStat> getPlayers() {
+        return new ArrayList<>(PlayerStat.players.values());
     }
     
-    public static void setPlayers(final ArrayList<PlayerStat> playerData) {
-        PlayerStat.players = playerData;
+    public static void setPlayers(final Collection<PlayerStat> playerData) {
+        if (playerData == null) {
+            return;
+        }
+        PlayerStat.players.clear();
+        for (final PlayerStat pData : playerData) {
+            if (pData != null && pData.getId() != null) {
+                PlayerStat.players.putIfAbsent(pData.getId(), pData);
+            }
+        }
     }
     
     public static PlayerStat getPlayerStats(final String playerData) {
-        for (final PlayerStat pData : getPlayers()) {
-            if (pData.getId().equals(playerData)) {
-                return pData;
-            }
+        if (playerData == null) {
+            return null;
         }
-        return null;
+        return PlayerStat.players.get(playerData);
     }
     
     public static PlayerStat getPlayerStats(final Player player) {
-        String uuid = player.getUniqueId().toString();
-    	for (final PlayerStat pData : getPlayers()) {
-            if (pData.getId().equals(uuid)) {
-                return pData;
-            }
+        if (player == null) {
+            return null;
         }
-        return null;
+        String uuid = player.getUniqueId().toString();
+        return PlayerStat.players.get(uuid);
     }
     
     public static PlayerStat getPlayerStats(final UUID uuid) {
-    	for (final PlayerStat pData : getPlayers()) {
-            if (pData.getId().equals(uuid.toString())) {
-                return pData;
-            }
+        if (uuid == null) {
+            return null;
         }
-        return null;
+        return PlayerStat.players.get(uuid.toString());
     }
     
     public String getId() {
@@ -250,7 +273,7 @@ public class PlayerStat
     }
         
     static {
-        PlayerStat.players = new ArrayList<>();
+        PlayerStat.players = new ConcurrentHashMap<>();
     }
     
     public boolean isInitialized() {
@@ -437,9 +460,11 @@ public class PlayerStat
 	}
 
 	public static void removePlayer(String id) {
-		PlayerStat ps = getPlayerStats(id);
-		if (ps != null) {
-			players.remove(ps);
+		if (id == null) {
+			return;
+		}
+		if (getPlayerStats(id) != null) {
+			players.remove(id);
 		}
 	}
 }

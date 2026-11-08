@@ -601,16 +601,20 @@ public class MatchManager
         gameMap.update();
         gameMap.setTimer(0);
         if (SkyWarsReloaded.get().isEnabled() && !gameMap.getMatchState().equals(MatchState.OFFLINE)) {
-                for (final Player player: gameMap.getAllPlayers()) {
-                        new BukkitRunnable() {
+                final java.util.List<Player> saveSnapshot = new java.util.ArrayList<>(gameMap.getAllPlayers());
+                final java.util.Set<UUID> savedStatsSet = new java.util.HashSet<>();
+                new BukkitRunnable() {
                     public void run() {
-                        PlayerStat toSave = PlayerStat.getPlayerStats(player.getUniqueId().toString());
-                        if (toSave != null) {
-                            DataStorage.get().saveStats(toSave);
+                        for (final Player player : saveSnapshot) {
+                            if (player == null) continue;
+                            if (!savedStatsSet.add(player.getUniqueId())) continue;
+                            PlayerStat toSave = PlayerStat.getPlayerStats(player.getUniqueId().toString());
+                            if (toSave != null) {
+                                DataStorage.get().saveStats(toSave);
+                            }
                         }
                     }
                 }.runTaskAsynchronously(SkyWarsReloaded.get());
-                }
             new BukkitRunnable() {
                 public void run() {
                                         java.util.Set<UUID> processedAsSpectator = new java.util.HashSet<>(gameMap.getSpectators());
@@ -874,6 +878,14 @@ public class MatchManager
                 playerData.restore(playerQuit);
                 PlayerData.getPlayerData().remove(playerData);
             }
+        }
+        final PlayerStat statToQueue = PlayerStat.getPlayerStats(player.getUniqueId().toString());
+        if (statToQueue != null) {
+            new BukkitRunnable() {
+                public void run() {
+                    DataStorage.get().saveStats(statToQueue);
+                }
+            }.runTaskAsynchronously(SkyWarsReloaded.get());
         }
         if (debug) {
                 Util.get().logToFile(debugName + ChatColor.YELLOW + player.getName() + " Has Left The SkyWars Match on map" + gameMap.getName());
