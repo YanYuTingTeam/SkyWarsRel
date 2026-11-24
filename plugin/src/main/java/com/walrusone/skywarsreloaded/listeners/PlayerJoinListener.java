@@ -23,6 +23,7 @@ public class PlayerJoinListener implements Listener
 			@Override
 			public void run() {
 				if (SkyWarsReloaded.getCfg().getSpawn() != null && SkyWarsReloaded.getCfg().teleportOnJoin()) {
+					if (PatrolUtils.isPatrolling(a1.getPlayer())) return;
 					a1.getPlayer().teleport(SkyWarsReloaded.getCfg().getSpawn());
 				}
 			}
@@ -58,6 +59,7 @@ public class PlayerJoinListener implements Listener
 		new BukkitRunnable() {
 			@Override
 			public void run() {
+				if (PatrolUtils.isPatrolling(a1.getPlayer())) return;
 				for(GameMap gMap: GameMap.getMaps()) {
 					if (gMap.getCurrentWorld() != null && gMap.getCurrentWorld().equals(a1.getPlayer().getWorld())) {
 						if (SkyWarsReloaded.getCfg().getSpawn() != null) {

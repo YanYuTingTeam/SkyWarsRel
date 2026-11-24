@@ -30,6 +30,7 @@ import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.MatchState;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import com.walrusone.skywarsreloaded.game.cages.Cage;
 import com.walrusone.skywarsreloaded.game.cages.CageType;
 import com.walrusone.skywarsreloaded.game.cages.CubeCage;
@@ -257,7 +258,7 @@ public class GameMap {
         /*Player Handling Methods*/
         
         public boolean addPlayers(@Nullable TeamCard teamToTry, final Player player) {
-                if (Util.get().isBusy(player.getUniqueId())) {
+                if (player == null || PatrolUtils.isPatrolling(player) || Util.get().isBusy(player.getUniqueId())) {
                         return false;
                 }
                 boolean result = false;
@@ -295,6 +296,9 @@ public class GameMap {
     }
         
         public boolean addPlayers(@Nullable TeamCard teamToTry, final Party party) {
+                for (UUID uuid : party.getMembers()) {
+                        if (PatrolUtils.isPatrolling(uuid)) return false;
+                }
                 TeamCard team = null;
                 Map<TeamCard, ArrayList<Player>> players = new HashMap<>();
                 if (teamSize == 1) {

@@ -15,6 +15,7 @@ import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 
 public class PlayerTeleportListener implements Listener
 {
@@ -22,6 +23,7 @@ public class PlayerTeleportListener implements Listener
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerTeleport(final PlayerTeleportEvent a1) {
     		Player player = a1.getPlayer();
+            if (PatrolUtils.isPatrolling(player)) return;
             final GameMap gameMap = MatchManager.get().getPlayerMap(player);
         	if (gameMap == null) {
         		if (SkyWarsReloaded.getCfg().getSpawn() != null) {

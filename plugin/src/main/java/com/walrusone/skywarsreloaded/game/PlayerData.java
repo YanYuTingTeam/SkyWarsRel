@@ -17,6 +17,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
 import com.walrusone.skywarsreloaded.utilities.Tagged;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import com.walrusone.skywarsreloaded.utilities.Util;
 
 public class PlayerData {
@@ -72,7 +73,7 @@ public class PlayerData {
 			if (!beingRestored) {
 				beingRestored = true;
 		        final Player player = this.getPlayer();
-		        if (player == null) {
+		        if (player == null || PatrolUtils.isPatrolling(player)) {
 		            return;
 		        }
 		        
@@ -118,6 +119,7 @@ public class PlayerData {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
+                                if (PatrolUtils.isPatrolling(player)) return;
                                 player.teleport(respawn, TeleportCause.END_PORTAL);
                             }
                         }.runTaskLater(SkyWarsReloaded.get(), 2);
@@ -134,6 +136,7 @@ public class PlayerData {
 					new BukkitRunnable() {
 						@Override
 						public void run() {
+							if (PatrolUtils.isPatrolling(player)) return;
 							String uuid = player.getUniqueId().toString();
 							SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());
 							PlayerStat remove = PlayerStat.getPlayerStats(uuid);

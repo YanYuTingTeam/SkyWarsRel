@@ -27,6 +27,7 @@ import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import com.walrusone.skywarsreloaded.utilities.Util;
 
 public class SpectateListener implements Listener{
@@ -36,6 +37,7 @@ public class SpectateListener implements Listener{
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onPlayerTeleport(PlayerTeleportEvent e) {
                 final Player player = e.getPlayer();
+                if (PatrolUtils.isPatrolling(player)) return;
                 final GameMap gameMap = MatchManager.get().getSpectatorMap(player);
                 if (gameMap == null || player.hasPermission("sw.opteleport")) {
                         return;

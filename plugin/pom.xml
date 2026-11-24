@@ -88,13 +88,6 @@
             <version>2.2.2</version>
         </dependency>
         <dependency>
-            <groupId>com.aermini</groupId>
-            <artifactId>AerReport</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/AerReport-1.0.0.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
         </dependency>

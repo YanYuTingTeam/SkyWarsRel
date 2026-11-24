@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.walrusone.skywarsreloaded.enums.GameType;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
+import com.walrusone.skywarsreloaded.utilities.PatrolUtils;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
@@ -87,7 +88,7 @@ public class PlayerStat
 						public void run() {
 			            		if (SkyWarsReloaded.getCfg().bungeeMode()) {
 			                		Player player = SkyWarsReloaded.get().getServer().getPlayer(UUID.fromString(uuid));
-			                		if (player != null && MatchManager.get().getPlayerMap(player) == null) {
+								if (player != null && !PatrolUtils.isPatrolling(player) && MatchManager.get().getPlayerMap(player) == null) {
 			                			boolean joined = MatchManager.get().joinGame(player, GameType.ALL);
 			                			if (!joined) {
 			                    			SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());
@@ -122,6 +123,7 @@ public class PlayerStat
 						new BukkitRunnable() {
 							@Override
 							public void run() {
+								if (PatrolUtils.isPatrolling(player)) return;
 								if (Util.get().isSpawnWorld(player.getWorld())) {
 									if (MatchManager.get().getPlayerMap(player) != null) {
 										return;
