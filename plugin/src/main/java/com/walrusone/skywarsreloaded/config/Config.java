@@ -55,6 +55,7 @@ public class Config {
 	private boolean leaderHeadsEnabled;
 	private int leaderboardUpdateInterval;
 	private boolean eloEnabled;
+	private String eloMode;
 	private boolean winsEnabled;
 	private boolean lossesEnabled;
 	private boolean killsEnabled;
@@ -272,6 +273,7 @@ public class Config {
 			
 			bungeeMode = SkyWarsReloaded.get().getConfig().getBoolean("bungeeMode");
 			economyEnabled = SkyWarsReloaded.get().getConfig().getBoolean("economyEnabled");
+			eloMode = SkyWarsReloaded.get().getConfig().getString("elo-mode", "default");
 			bungeeLobby = SkyWarsReloaded.get().getConfig().getString("bungeeLobby");
 			gameEndCommands = SkyWarsReloaded.get().getConfig().getStringList("gameEndCommands");
 			resourcePack = SkyWarsReloaded.get().getConfig().getString("resourcepack");
@@ -497,6 +499,7 @@ public class Config {
 		SkyWarsReloaded.get().getConfig().set("spawn", Util.get().locationToString(spawn));
 		
 		SkyWarsReloaded.get().getConfig().set("economyEnabled", economyEnabled);
+		SkyWarsReloaded.get().getConfig().set("elo-mode", eloMode);
 		SkyWarsReloaded.get().getConfig().set("bungeeMode", bungeeMode);
 		SkyWarsReloaded.get().getConfig().set("bungeeLobby", bungeeLobby);
 		SkyWarsReloaded.get().getConfig().set("gameEndCommands", gameEndCommands);
@@ -733,6 +736,10 @@ public class Config {
 	
 	public String getBungeeLobby() {
 		return bungeeLobby;
+	}
+
+	public String getEloMode() {
+		return eloMode;
 	}
 
 	public int getCooldown() {

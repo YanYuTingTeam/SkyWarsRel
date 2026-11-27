@@ -12,6 +12,7 @@ lobbyBoardEnabled: false
 displayPlayerLevelOnXpBar: true
 enabledLobbyGuard: false
 economyEnabled: false
+elo-mode: default
 game:
   instantVoidDeath: true
   voidDeathY: -15

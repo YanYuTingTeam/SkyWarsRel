@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.Vote;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
 
@@ -118,6 +119,10 @@ public class PlayerCard {
 	}
 	
 	public void calculateELO() {
+		if ("hyt".equalsIgnoreCase(SkyWarsReloaded.getCfg().getEloMode())) {
+			calculateHytELO();
+			return;
+		}
 	        int n = tCard.getGameMap().getPlayerCount();
 	        if (n <= 1) {
 	            this.postElo = this.preElo;
@@ -150,6 +155,36 @@ public class PlayerCard {
 
 	            this.postElo = this.preElo + this.eloChange;
 	        }
+
+	private void calculateHytELO() {
+		int n = tCard.getGameMap().getPlayerCount();
+		if (n <= 1) { this.postElo = this.preElo; return; }
+		float K = 32F / (float)n;
+		int curPlace = tCard.getPlace();
+		int curELO = preElo;
+		float sum = 0;
+		for (TeamCard tCard2 : tCard.getGameMap().getTeamCards()) {
+			PlayerCard opponent = tCard2.getPlayerCards().get(0);
+			if (opponent.getUUID() == null || opponent.getUUID().equals(uuid)) continue;
+			float S;
+			if (curPlace < opponent.tCard.getPlace()) S = 1.0F;
+			else if (curPlace == opponent.tCard.getPlace()) S = 0.5F;
+			else S = 0.0F;
+			float EA = 1 / (1.0f + (float)Math.pow(18, (opponent.getPreElo() - curELO) / 4800.0f));
+			sum += K * (S - EA);
+		}
+		float delta = sum;
+		delta = (float)Math.round(delta);
+		if (delta > 0) delta *= 2.5F;
+		else if (delta < 0) {
+			if (preElo < 1800) delta *= 0.8F;
+			delta *= 1.3F;
+		}
+		delta += (n - curPlace) * 2F;
+		if (curPlace == 1 && delta < 15F) delta = 15F;
+		this.eloChange = Math.round(delta);
+		this.postElo = this.preElo + this.eloChange;
+	}
 
 	public UUID getUUID() {
 		return uuid;
